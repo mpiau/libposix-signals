@@ -108,7 +108,7 @@ help:
 clean:
 	rm -r $(OBJS_DIR) 2> /dev/null || true
 	rm -r $(DEPS_DIR) 2> /dev/null || true
-	rm $(BUILD_DIR)/$(BINARY) 2> /dev/null || true
+	rm $(BINARY) 2> /dev/null || true
 
 $(BINARY): $(OBJS)
 	ar rc $(BINARY) $^
