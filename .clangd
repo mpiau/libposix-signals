@@ -1,0 +1,16 @@
+---
+If:
+   PathMatch: [.*\.h, .*\.c]
+CompileFlags:
+   Compiler: gcc
+   Add:
+      - "-xc" # Without it, .h files would be treated as C++ files, not C.
+      - "-std=c23"
+      - "-Wall"
+      - "-Wextra"
+      # Note that include folders are added in compile_flags.txt.
+      # because .clangd doesn't support relative paths, only full ones.
+---
+Diagnostics:
+   MissingIncludes: None
+   UnusedIncludes: None
