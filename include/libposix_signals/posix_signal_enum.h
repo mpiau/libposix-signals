@@ -5,10 +5,10 @@
 // POSIX Signals
 //================================================================================================
 
-enum PSignal : unsigned char
+enum PSignal : int
 {
    //---------------------------------------------------------------------------------------------
-   // Standard Signals
+   // POSIX Standard Signals
    //---------------------------------------------------------------------------------------------
 
      PSignal_SIGHUP    // Terminal Hang-Up / Process Death Detected
@@ -52,7 +52,7 @@ enum PSignal : unsigned char
 
 
    //---------------------------------------------------------------------------------------------
-   // Real-time (user-defined) Signals
+   // POSIX Real-time (user-defined) Signals
    //---------------------------------------------------------------------------------------------
 
    , PSignal_SIGRTMIN    // Real-time signal 0

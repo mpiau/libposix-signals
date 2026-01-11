@@ -45,9 +45,8 @@ OBJS := $(patsubst %,$(OBJS_DIR)/%.o,$(basename $(SRCS)))
 DEPS := $(patsubst %,$(DEPS_DIR)/%.d,$(basename $(SRCS)))
 
 # Creating needed sub/folders if they don't exist as they won't be created by compilers
-# TMP: Comment for now as we don't have any source file to compile.
-# $(shell mkdir -p "$(dir $(OBJS))" >/dev/null)
-# $(shell mkdir -p "$(dir $(DEPS))" >/dev/null)
+$(shell mkdir -p "$(dir $(OBJS))" >/dev/null)
+$(shell mkdir -p "$(dir $(DEPS))" >/dev/null)
 
 
 # ============================================================================
