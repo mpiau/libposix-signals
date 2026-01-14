@@ -16,7 +16,7 @@ typedef enum LibStatus LibStatus;
 static atomic_int s_libStatus = LibStatus_NOT_INITIALIZED;
 
 
-bool psignal_library_init(void)
+bool psig_library_init(void)
 {
    int expected = LibStatus_NOT_INITIALIZED;
    int const desired = LibStatus_INITIALIZING;
@@ -31,16 +31,16 @@ bool psignal_library_init(void)
    }
    else
    {
-      return psignal_library_is_running();
+      return psig_library_is_running();
    }
 }
 
-bool psignal_library_is_running(void)
+bool psig_library_is_running(void)
 {
    return atomic_load(&s_libStatus) == LibStatus_RUNNING;
 }
 
-void psignal_library_shutdown(void)
+void psig_library_shutdown(void)
 {
    int expected = LibStatus_RUNNING;
    int const desired = LibStatus_SHUTTING_DOWN;
@@ -52,7 +52,7 @@ void psignal_library_shutdown(void)
    }
 }
 
-char const *psignal_library_description(void)
+ascii const *psig_library_description(void)
 {
    return "POSIX Signals Library";
 }

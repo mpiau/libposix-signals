@@ -5,15 +5,15 @@
 
 int main(void)
 {
-   printf("Running tests for \"%s\"...\n", psignal_library_description());
+   printf("Running tests for \"%s\"...\n", psig_library_description());
 
-   assert(psignal_library_init() == true);
-   assert(psignal_library_init() == true);
-   assert(psignal_library_is_running() == true);
-   psignal_library_shutdown();
-   assert(psignal_library_is_running() == false);
-   psignal_library_shutdown();
-   assert(psignal_library_is_running() == false);
+   assert(psig_library_init() == true);
+   assert(psig_library_init() == true);
+   assert(psig_library_is_running() == true);
+   psig_library_shutdown();
+   assert(psig_library_is_running() == false);
+   psig_library_shutdown();
+   assert(psig_library_is_running() == false);
 
    printf("All tests passed !\n");
 

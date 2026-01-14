@@ -1,17 +1,16 @@
 #pragma once
 
-
 //================================================================================================
 // POSIX Signal Dispositions
 //================================================================================================
 
-enum PSignalDisposition : unsigned char
+enum PSigDisposition : unsigned char
 {
-     PSignalDisposition_CONTINUE  // Continue the process if it's currently stopped.
-   , PSignalDisposition_CORE_DUMP // Terminate the process and produces core dump file.
-   , PSignalDisposition_IGNORE    // Ignore the signal.
-   , PSignalDisposition_STOP      // Stop the process.
-   , PSignalDisposition_TERMINATE // Terminate the process.
+     PSigDisposition_CONTINUE  // Continue the process if it's currently stopped.
+   , PSigDisposition_CORE_DUMP // Terminate the process and produces core dump file.
+   , PSigDisposition_IGNORE    // Ignore the signal.
+   , PSigDisposition_STOP      // Stop the process.
+   , PSigDisposition_TERMINATE // Terminate the process.
 };
 
-typedef enum PSignalDisposition PSignalDisposition;
+typedef enum PSigDisposition PSigDisposition;
