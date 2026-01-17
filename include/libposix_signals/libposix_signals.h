@@ -1,8 +1,8 @@
 #pragma once
 
 #include "posix_signal_dispositions.h"
-#include "posix_signal_enum.h"
-#include "posix_signal_types.h"
+#include "posix_signal_emission_reason.h"
+#include "posix_signals.h"
 
 
 //================================================================================================
@@ -13,5 +13,5 @@
 [[nodiscard]] bool psig_library_is_running(void);
 void psig_library_shutdown(void);
 
-[[nodiscard]] ascii const *psig_library_description(void);
+[[nodiscard]] char const *psig_library_description(void);
 

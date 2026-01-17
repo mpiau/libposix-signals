@@ -4,13 +4,13 @@
 // POSIX Signal Dispositions
 //================================================================================================
 
-enum PSigDisposition : unsigned char
+enum PSigDisp : unsigned char
 {
-     PSigDisposition_CONTINUE  // Continue the process if it's currently stopped.
-   , PSigDisposition_CORE_DUMP // Terminate the process and produces core dump file.
-   , PSigDisposition_IGNORE    // Ignore the signal.
-   , PSigDisposition_STOP      // Stop the process.
-   , PSigDisposition_TERMINATE // Terminate the process.
+     PSigDisp_CONTINUE  // Continue the process if it's currently stopped.
+   , PSigDisp_CORE_DUMP // Terminate the process and produces core dump file.
+   , PSigDisp_IGNORE    // Ignore the signal.
+   , PSigDisp_STOP      // Stop the process.
+   , PSigDisp_TERMINATE // Terminate the process.
 };
 
-typedef enum PSigDisposition PSigDisposition;
+typedef enum PSigDisp PSigDisp;

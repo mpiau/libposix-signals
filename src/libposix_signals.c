@@ -52,7 +52,7 @@ void psig_library_shutdown(void)
    }
 }
 
-ascii const *psig_library_description(void)
+char const *psig_library_description(void)
 {
    return "POSIX Signals Library";
 }

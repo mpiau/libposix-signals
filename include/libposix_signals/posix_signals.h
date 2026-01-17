@@ -1,5 +1,7 @@
 #pragma once
 
+#include "posix_signal_dispositions.h"
+
 
 //================================================================================================
 // POSIX Signals
@@ -87,6 +89,66 @@ enum PSignal : int
    , PSignal_SIGRTMAX_2  // Real-time signal 28
    , PSignal_SIGRTMAX_1  // Real-time signal 29
    , PSignal_SIGRTMAX    // Real-time signal 30
+
+
+   //---------------------------------------------------------------------------------------------
+   // Helpers
+   //---------------------------------------------------------------------------------------------
+
+   // These First/Last helpers can be defined because PSignal is contiguous.
+   , PSignal_EnumFirst = PSignal_SIGHUP
+   , PSignal_EnumLast  = PSignal_SIGRTMAX
+   , PSignal_EnumCount = (PSignal_SIGRTMAX - PSignal_SIGHUP) + 1
+
+   , PSignal_EnumStandardFirst = PSignal_SIGHUP
+   , PSignal_EnumStandardLast  = PSignal_SIGSYS
+   , PSignal_EnumStandardCount = (PSignal_EnumStandardLast - PSignal_EnumStandardFirst) + 1
+
+   , PSignal_EnumRealTimeFirst = PSignal_SIGRTMIN
+   , PSignal_EnumRealTimeLast  = PSignal_SIGRTMAX
+   , PSignal_EnumRealTimeCount = (PSignal_EnumRealTimeLast - PSignal_EnumRealTimeFirst) + 1
 };
 
 typedef enum PSignal PSignal;
+
+
+//================================================================================================
+// API Functions
+//================================================================================================
+
+//------------------------------------------------------------------------------------------------
+// Identification
+//------------------------------------------------------------------------------------------------
+
+// Validate that the given value is correctly defined in the enum.
+// IMPORTANT: 
+// - Always validate first that your value is valid before converting it to PSignal.
+// - Enum values != raw signal value. Use psignal_from_raw_signal instead for raw signal values.
+// - All the functions taking a PSignal WILL ASSUME that the given enum value is VALID.
+[[nodiscard]] bool psignal_validate(int);
+
+
+//------------------------------------------------------------------------------------------------
+// POSIX Signal Properties
+//------------------------------------------------------------------------------------------------
+
+[[nodiscard]] bool psignal_is_real_time(PSignal);
+[[nodiscard]] bool psignal_is_standard(PSignal);
+
+[[nodiscard]] int  psignal_associated_raw_signal(PSignal);
+[[nodiscard]] bool psignal_is_hookable(PSignal);
+[[nodiscard]] PSigDisp psignal_default_disposition(PSignal);
+
+[[nodiscard]] char const *psignal_name(PSignal);
+[[nodiscard]] char const *psignal_desc(PSignal);
+
+
+//------------------------------------------------------------------------------------------------
+// Conversion functions
+//------------------------------------------------------------------------------------------------
+
+// Try to convert the given raw signal value (int) into one of the defined signal in the enum.
+// If the signal is invalid, false will be returned and nothing will be written in PSignal param.
+// Example: Given SIGINT, PSignal_SIGINT will be set and true returned.
+// Example: Given 0xFFFF, false will be returned.
+[[nodiscard]] bool psignal_from_raw_signal(int, PSignal *);
