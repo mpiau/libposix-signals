@@ -73,38 +73,38 @@ static constexpr StdSigProperties S_STD_SIGNALS_PROPS[] =
 
 static constexpr RTSigProperties S_RT_SIGNALS_PROPS[] =
 {
-     (RTSigProperties){ .name = "SIGRTMIN",      .desc = "Real-time signal 0" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 1",  .desc = "Real-time signal 1" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 2",  .desc = "Real-time signal 2" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 3",  .desc = "Real-time signal 3" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 4",  .desc = "Real-time signal 4" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 5",  .desc = "Real-time signal 5" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 6",  .desc = "Real-time signal 6" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 7",  .desc = "Real-time signal 7" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 8",  .desc = "Real-time signal 8" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 9",  .desc = "Real-time signal 9" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 10", .desc = "Real-time signal 10" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 11", .desc = "Real-time signal 11" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 12", .desc = "Real-time signal 12" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 13", .desc = "Real-time signal 13" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 14", .desc = "Real-time signal 14" }
-   , (RTSigProperties){ .name = "SIGRTMIN + 15", .desc = "Real-time signal 15" }
+     (RTSigProperties) { .name = "SIGRTMIN",      .desc = "Real-time signal 0" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 1",  .desc = "Real-time signal 1" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 2",  .desc = "Real-time signal 2" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 3",  .desc = "Real-time signal 3" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 4",  .desc = "Real-time signal 4" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 5",  .desc = "Real-time signal 5" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 6",  .desc = "Real-time signal 6" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 7",  .desc = "Real-time signal 7" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 8",  .desc = "Real-time signal 8" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 9",  .desc = "Real-time signal 9" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 10", .desc = "Real-time signal 10" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 11", .desc = "Real-time signal 11" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 12", .desc = "Real-time signal 12" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 13", .desc = "Real-time signal 13" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 14", .desc = "Real-time signal 14" }
+   , (RTSigProperties) { .name = "SIGRTMIN + 15", .desc = "Real-time signal 15" }
 
-   , (RTSigProperties){ .name = "SIGRTMAX - 14", .desc = "Real-time signal 16" }
-   , (RTSigProperties){ .name = "SIGRTMAX - 13", .desc = "Real-time signal 17" }
-   , (RTSigProperties){ .name = "SIGRTMAX - 12", .desc = "Real-time signal 18" }
-   , (RTSigProperties){ .name = "SIGRTMAX - 11", .desc = "Real-time signal 19" }
-   , (RTSigProperties){ .name = "SIGRTMAX - 10", .desc = "Real-time signal 20" }
-   , (RTSigProperties){ .name = "SIGRTMAX - 9",  .desc = "Real-time signal 21" }
-   , (RTSigProperties){ .name = "SIGRTMAX - 8",  .desc = "Real-time signal 22" }
-   , (RTSigProperties){ .name = "SIGRTMAX - 7",  .desc = "Real-time signal 23" }
-   , (RTSigProperties){ .name = "SIGRTMAX - 6",  .desc = "Real-time signal 24" }
-   , (RTSigProperties){ .name = "SIGRTMAX - 5",  .desc = "Real-time signal 25" }
-   , (RTSigProperties){ .name = "SIGRTMAX - 4",  .desc = "Real-time signal 26" }
-   , (RTSigProperties){ .name = "SIGRTMAX - 3",  .desc = "Real-time signal 27" }
-   , (RTSigProperties){ .name = "SIGRTMAX - 2",  .desc = "Real-time signal 28" }
-   , (RTSigProperties){ .name = "SIGRTMAX - 1",  .desc = "Real-time signal 29" }
-   , (RTSigProperties){ .name = "SIGRTMAX",      .desc = "Real-time signal 30" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 14", .desc = "Real-time signal 16" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 13", .desc = "Real-time signal 17" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 12", .desc = "Real-time signal 18" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 11", .desc = "Real-time signal 19" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 10", .desc = "Real-time signal 20" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 9",  .desc = "Real-time signal 21" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 8",  .desc = "Real-time signal 22" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 7",  .desc = "Real-time signal 23" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 6",  .desc = "Real-time signal 24" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 5",  .desc = "Real-time signal 25" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 4",  .desc = "Real-time signal 26" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 3",  .desc = "Real-time signal 27" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 2",  .desc = "Real-time signal 28" }
+   , (RTSigProperties) { .name = "SIGRTMAX - 1",  .desc = "Real-time signal 29" }
+   , (RTSigProperties) { .name = "SIGRTMAX",      .desc = "Real-time signal 30" }
 };
 
 
@@ -180,11 +180,7 @@ char const *psignal_desc(PSignal const psig)
 // Conversion functions
 //------------------------------------------------------------------------------------------------
 
-// Try to convert the given raw signal value (int) into one of the defined signal in the enum.
-// If the signal is invalid, false will be returned and nothing will be written in PSignal param.
-// Example: Given SIGINT, (RTSigProperties){ .name = e set and true re.desc = turned.
-// Example:  }iven 0xFFFF, false will be returned.
-bool psignal_try_from_raw_signal(int const signal, PSignal *out)
+bool psignal_try_from_raw_signal(int const signal, PSignal *const out)
 {
    // STD Signals
    for (PSignal idx = PSignal_EnumStandardFirst; idx <= PSignal_EnumStandardLast; ++idx)
