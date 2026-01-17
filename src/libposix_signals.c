@@ -3,7 +3,7 @@
 #include <stdatomic.h>
 
 
-enum LibStatus
+enum LibStatus : int
 {
    LibStatus_NOT_INITIALIZED,
    LibStatus_INITIALIZING,

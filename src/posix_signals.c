@@ -113,6 +113,25 @@ static_assert(arrayCapacity(S_RT_SIGNALS_PROPS)  == PSignal_EnumRealTimeCount);
 
 
 //================================================================================================
+// Internal Functions
+//================================================================================================
+
+// We can't assume that STD/RT signals are 0-indexed so these functions are defined for that.
+
+[[nodiscard]] static inline unsigned int std_sig_idx(PSignal const psig)
+{
+   assert(psignal_is_standard(psig));
+   return (psig - PSignal_EnumStandardFirst);
+}
+
+[[nodiscard]] static inline unsigned int rt_sig_idx(PSignal const psig)
+{
+   assert(psignal_is_real_time(psig));
+   return (psig - PSignal_EnumRealTimeFirst);
+}
+
+
+//================================================================================================
 // API Functions
 //================================================================================================
 
@@ -144,8 +163,8 @@ bool psignal_is_standard(PSignal const psig)
 int psignal_associated_raw_signal(PSignal const psig)
 {
    return psignal_is_standard(psig)
-      ? S_STD_SIGNALS_PROPS[psig].rawSignal
-      : SIGRTMIN + (psig - PSignal_EnumRealTimeFirst);
+      ? S_STD_SIGNALS_PROPS[std_sig_idx(psig)].rawSignal
+      : SIGRTMIN + (int)rt_sig_idx(psig);
 }
 
 bool psignal_is_hookable(PSignal const psig)
@@ -156,7 +175,7 @@ bool psignal_is_hookable(PSignal const psig)
 PSigDisp psignal_default_disposition(PSignal const psig)
 {
    return psignal_is_standard(psig)
-      ? S_STD_SIGNALS_PROPS[psig].disposition
+      ? S_STD_SIGNALS_PROPS[std_sig_idx(psig)].disposition
       : PSigDisp_IGNORE;
 }
 
@@ -164,15 +183,15 @@ PSigDisp psignal_default_disposition(PSignal const psig)
 char const *psignal_name(PSignal const psig)
 {
    return psignal_is_standard(psig)
-      ? S_STD_SIGNALS_PROPS[psig].name
-      : S_RT_SIGNALS_PROPS[psig - PSignal_EnumRealTimeFirst].name;
+      ? S_STD_SIGNALS_PROPS[std_sig_idx(psig)].name
+      : S_RT_SIGNALS_PROPS[rt_sig_idx(psig)].name;
 }
 
 char const *psignal_desc(PSignal const psig)
 {
    return psignal_is_standard(psig)
-      ? S_STD_SIGNALS_PROPS[psig].desc
-      : S_RT_SIGNALS_PROPS[psig - PSignal_EnumRealTimeFirst].desc;
+      ? S_STD_SIGNALS_PROPS[std_sig_idx(psig)].desc
+      : S_RT_SIGNALS_PROPS[rt_sig_idx(psig)].desc;
 }
 
 

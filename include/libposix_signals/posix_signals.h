@@ -98,7 +98,7 @@ enum PSignal : int
    // These First/Last helpers can be defined because PSignal is contiguous.
    , PSignal_EnumFirst = PSignal_SIGHUP
    , PSignal_EnumLast  = PSignal_SIGRTMAX
-   , PSignal_EnumCount = (PSignal_SIGRTMAX - PSignal_SIGHUP) + 1
+   , PSignal_EnumCount = (PSignal_EnumLast - PSignal_EnumFirst) + 1
 
    , PSignal_EnumStandardFirst = PSignal_SIGHUP
    , PSignal_EnumStandardLast  = PSignal_SIGSYS
