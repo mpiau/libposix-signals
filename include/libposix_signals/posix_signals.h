@@ -100,13 +100,13 @@ enum PSignal : int
    , PSignal_EnumLast  = PSignal_SIGRTMAX
    , PSignal_EnumCount = (PSignal_EnumLast - PSignal_EnumFirst) + 1
 
-   , PSignal_EnumStandardFirst = PSignal_SIGHUP
-   , PSignal_EnumStandardLast  = PSignal_SIGSYS
-   , PSignal_EnumStandardCount = (PSignal_EnumStandardLast - PSignal_EnumStandardFirst) + 1
+   , PSignal_EnumStdFirst = PSignal_SIGHUP
+   , PSignal_EnumStdLast  = PSignal_SIGSYS
+   , PSignal_EnumStdCount = (PSignal_EnumStdLast - PSignal_EnumStdFirst) + 1
 
-   , PSignal_EnumRealTimeFirst = PSignal_SIGRTMIN
-   , PSignal_EnumRealTimeLast  = PSignal_SIGRTMAX
-   , PSignal_EnumRealTimeCount = (PSignal_EnumRealTimeLast - PSignal_EnumRealTimeFirst) + 1
+   , PSignal_EnumRTFirst = PSignal_SIGRTMIN
+   , PSignal_EnumRTLast  = PSignal_SIGRTMAX
+   , PSignal_EnumRTCount = (PSignal_EnumRTLast - PSignal_EnumRTFirst) + 1
 };
 
 typedef enum PSignal PSignal;
