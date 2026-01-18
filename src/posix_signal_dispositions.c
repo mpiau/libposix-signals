@@ -44,7 +44,7 @@ static constexpr PSigDisposition S_PSIG_STD_DISPS[] =
    , [PSignal_SIGSYS]    = PSigDisposition_CORE_DUMP
 };
 
-static_assert(arrayCapacity(S_PSIG_STD_DISPS) == PSignal_ENUM_STD_COUNT);
+static_assert(array_capacity(S_PSIG_STD_DISPS) == PSignal_ENUM_STD_COUNT);
 
 
 //================================================================================================
