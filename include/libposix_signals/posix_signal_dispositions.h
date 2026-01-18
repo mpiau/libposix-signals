@@ -14,8 +14,6 @@
    However, there is no standardized default behaviour for Real-Time signals.
    As such, this library can't assume a particular disposition and will mark all real-time signals
    as PSigDisposition_UNSPECIFIED.
-
-   You can modify the disposition of both STD and RT signals (except for a few exceptions).
 */
 
 typedef enum PSigDisposition : unsigned char
@@ -63,28 +61,8 @@ bool psignal_disposition_validate(unsigned);
 PSigDisposition psignal_disposition_default(PSignal);
 
 /*
-   Returns the disposition currently applied for the given signal.
-*/
-[[nodiscard]]
-PSigDisposition psignal_disposition_current(PSignal);
-
-/*
-   Override the disposition of the given signal by the given disposition.
-   - You can't override the disposition of PSignal_SIGKILL and PSignal_SIGSTOP.
-   - You can't set the disposition to PSigDisposition_UNSPECIFIED.
-   - True will be returned if the requested disposition is already in used.
-*/
-[[nodiscard]]
-bool psignal_disposition_override(PSignal, PSigDisposition);
-
-/*
-   Reset the disposition of the given signal to its default.
-*/
-void psignal_disposition_reset(PSignal);
-
-/*
-   Returns a simple description for the current disposition. Useful for logging/debugging.
+   Returns a simple description for the given disposition. Useful for logging/debugging.
    Example: "Terminate" will be returned for PSigDisposition_TERMINATE.
 */
 [[nodiscard]]
-ascii const *psignal_disposition_desc(PSignal);
+ascii const *psignal_disposition_desc(PSigDisposition);
