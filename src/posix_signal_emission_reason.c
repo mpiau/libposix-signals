@@ -1,21 +1,21 @@
-#include "libposix_signals/posix_signal_emission_reason.h"
+#include "libposix_signals/posix_signal_emission_reasons.h"
 
 #define _GNU_SOURCE
 #include <signal.h>
 
 
-// ===============================================================================================
+//================================================================================================
 // Internal Data
-// ===============================================================================================
+//================================================================================================
 
-static constexpr char UNKNOWN_REASON[] = "Unknown reason";
+static constexpr ascii UNSPECIFIED_REASON[] = "Unspecified reason";
 
 
-// ===============================================================================================
+//================================================================================================
 // Internal functions
-// ===============================================================================================
+//================================================================================================
 
-static char const *sigill_signal_reason(int const code)
+static ascii const *sigill_signal_reason(sigcode const code)
 {
    switch (code)
    {
@@ -29,11 +29,11 @@ static char const *sigill_signal_reason(int const code)
       case ILL_BADSTK:   return "Internal stack error.";
       case ILL_BADIADDR: return "Unimplemented instruction address";
 
-      default: return UNKNOWN_REASON;
+      default: return UNSPECIFIED_REASON;
    }
 }
 
-static char const *sigfpe_signal_reason(int const code)
+static ascii const *sigfpe_signal_reason(sigcode const code)
 {
    switch (code)
    {
@@ -48,11 +48,11 @@ static char const *sigfpe_signal_reason(int const code)
       case FPE_FLTUNK:   return "Undiagnosed floating-point exception";
       case FPE_CONDTRAP: return "Trap on condition.";
 
-      default: return UNKNOWN_REASON;
+      default: return UNSPECIFIED_REASON;
    }
 }
 
-static char const *sigsegv_signal_reason(int const code)
+static ascii const *sigsegv_signal_reason(sigcode const code)
 {
    switch (code)
    {
@@ -67,11 +67,11 @@ static char const *sigsegv_signal_reason(int const code)
       case SEGV_MTESERR: return "Synchronous ARM MTE exception.";
       case SEGV_CPERR:   return "Control protection fault.";
 
-      default: return UNKNOWN_REASON;
+      default: return UNSPECIFIED_REASON;
    }
 }
 
-static char const *sigbus_signal_reason(int const code)
+static ascii const *sigbus_signal_reason(sigcode const code)
 {
    switch (code)
    {
@@ -81,11 +81,11 @@ static char const *sigbus_signal_reason(int const code)
       case BUS_MCEERR_AR: return "Hardware memory error: action required.";
       case BUS_MCEERR_AO: return "Hardware memory error: action optional.";
 
-      default: return UNKNOWN_REASON;
+      default: return UNSPECIFIED_REASON;
    }
 }
 
-static char const *sigtrap_signal_reason(int const code)
+static ascii const *sigtrap_signal_reason(sigcode const code)
 {
    switch (code)
    {
@@ -95,11 +95,11 @@ static char const *sigtrap_signal_reason(int const code)
       case TRAP_HWBKPT: return "Hardware breakpoint/watchpoint.";
       case TRAP_UNK:    return "Undiagnosed trap.";
 
-      default: return UNKNOWN_REASON;
+      default: return UNSPECIFIED_REASON;
    }
 }
 
-static char const *sigchld_signal_reason(int const code)
+static ascii const *sigchld_signal_reason(sigcode const code)
 {
    switch (code)
    {
@@ -110,11 +110,11 @@ static char const *sigchld_signal_reason(int const code)
       case CLD_STOPPED:   return "Child has stopped.";
       case CLD_CONTINUED: return "Stopped child has continued";
 
-      default: return UNKNOWN_REASON;
+      default: return UNSPECIFIED_REASON;
    }
 }
 
-static char const *sigpoll_signal_reason(int const code)
+static ascii const *sigpoll_signal_reason(sigcode const code)
 {
    switch (code)
    {
@@ -125,11 +125,11 @@ static char const *sigpoll_signal_reason(int const code)
       case POLL_PRI: return "High priority input available.";
       case POLL_HUP: return "Device disconnected.";
 
-      default: return UNKNOWN_REASON;
+      default: return UNSPECIFIED_REASON;
    }
 }
 
-static char const *other_signals_reason(int const code)
+static ascii const *other_signals_reason(sigcode const code)
 {
    switch (code)
    {
@@ -144,16 +144,16 @@ static char const *other_signals_reason(int const code)
       case SI_USER:     return "Sent by kill, sigsend.";
       case SI_KERNEL:   return "Sent by kernel.";
 
-      default: return UNKNOWN_REASON;
+      default: return UNSPECIFIED_REASON;
    }
 }
 
 
-// ===============================================================================================
+//================================================================================================
 // Public functions
-// ===============================================================================================
+//================================================================================================
 
-char const *sig_emission_reason(PSignal const sig, int const code)
+ascii const *sig_emission_reason(PSignal const sig, sigcode const code)
 {
    switch(sig)
    {

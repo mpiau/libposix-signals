@@ -18,7 +18,6 @@
    You can modify the disposition of both STD and RT signals (except for a few exceptions).
 */
 
-
 enum PSigDisposition : unsigned char
 {
      PSigDisposition_CONTINUE    // Continue the process if it's currently stopped.
@@ -38,6 +37,8 @@ enum PSigDisposition : unsigned char
 };
 
 typedef enum PSigDisposition PSigDisposition;
+
+typedef char ascii;
 
 
 //================================================================================================
@@ -89,4 +90,4 @@ void psignal_disposition_reset(PSignal);
    Returns a simple description for the current disposition. Useful for logging/debugging.
    Example: "Terminate" will be returned for PSigDisposition_TERMINATE.
 */
-[[nodiscard]] char const *psignal_disposition_desc(PSignal);
+[[nodiscard]] ascii const *psignal_disposition_desc(PSignal);
