@@ -66,7 +66,7 @@ bool psignal_disposition_validate(unsigned char);
 PSigDisposition psignal_disposition_default(PSignal);
 
 /*
-   Returns the current disposition applied for the given signal.
+   Returns the disposition currently applied for the given signal.
 */
 [[nodiscard]]
 PSigDisposition psignal_disposition_current(PSignal);
@@ -81,15 +81,12 @@ PSigDisposition psignal_disposition_current(PSignal);
 bool psignal_disposition_override(PSignal, PSigDisposition);
 
 /*
-   Returns the current disposition applied for the given signal.
-   - PSignal is assumed to be valid.
+   Reset the disposition of the given signal to its default.
 */
 void psignal_disposition_reset(PSignal);
 
 /*
-   Returns a simple description for the current disposition.
-   Useful for logging/debugging.
-   - PSignal is assumed to be valid.
+   Returns a simple description for the current disposition. Useful for logging/debugging.
    Example: "Terminate" will be returned for PSigDisposition_TERMINATE.
 */
 [[nodiscard]] char const *psignal_disposition_desc(PSignal);
