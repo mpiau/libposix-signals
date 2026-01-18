@@ -1,5 +1,6 @@
 #include "libposix_signals/posix_signals.h"
 #include "libposix_signals/posix_signal_dispositions.h"
+#include "libmacros/macro_utils.h"
 
 #include <assert.h>
 #include <signal.h>
@@ -25,8 +26,6 @@ struct RTSigProperties
 };
 typedef struct RTSigProperties RTSigProperties;
 
-
-#define arrayCapacity(pArray) (sizeof(pArray) / sizeof(pArray[0]))
 
 #define CG_STDSIG_PROPS(pSig, pRaw, pDisp, pDesc)  \
    [pSig] = (StdSigProperties) { \

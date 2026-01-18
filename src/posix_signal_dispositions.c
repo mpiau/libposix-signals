@@ -1,5 +1,6 @@
 #include "libposix_signals/posix_signal_dispositions.h"
 #include "libposix_signals/posix_signals.h"
+#include "libmacros/macro_utils.h"
 
 #include <stddef.h>
 
@@ -42,8 +43,6 @@ static constexpr PSigDisposition S_PSIG_STD_DISPS[] =
    , [PSignal_SIGPWR]    = PSigDisposition_TERMINATE
    , [PSignal_SIGSYS]    = PSigDisposition_CORE_DUMP
 };
-
-#define arrayCapacity(pArray) (sizeof(pArray) / sizeof(pArray[0]))
 
 static_assert(arrayCapacity(S_PSIG_STD_DISPS) == PSignal_ENUM_STD_COUNT);
 
