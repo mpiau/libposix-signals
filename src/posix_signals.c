@@ -141,7 +141,7 @@ unsigned rt_sig_idx(PSignal const psig)
 bool psignal_validate(unsigned const v)
 {
    // The code below assumes that we start from 0 and enum is unsigned.
-   static_assert(PSignal_ENUM_STD_FIRST == 0 && (PSignal)-1 > 0);
+   static_assert(PSignal_ENUM_STD_FIRST == 0 && type_is_unsigned(PSignal));
 
    return v <= PSignal_ENUM_LAST;
 }
@@ -154,7 +154,7 @@ bool psignal_validate(unsigned const v)
 bool psignal_is_standard(PSignal const psig)
 {
    // The code below assumes that we start from 0 and enum is unsigned.
-   static_assert(PSignal_ENUM_STD_FIRST == 0 && (PSignal)-1 > 0);
+   static_assert(PSignal_ENUM_STD_FIRST == 0 && type_is_unsigned(PSignal));
 
    return psig <= PSignal_ENUM_STD_LAST;
 }

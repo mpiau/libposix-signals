@@ -58,7 +58,7 @@ static_assert(array_capacity(S_PSIG_STD_DISPS) == PSignal_ENUM_STD_COUNT);
 bool psignal_disposition_validate(unsigned const v)
 {
    // The code below assumes that we start from 0 and enum is unsigned.
-   static_assert(PSigDisposition_ENUM_FIRST == 0 && (PSigDisposition)-1 > 0);
+   static_assert(PSigDisposition_ENUM_FIRST == 0 && type_is_unsigned(PSigDisposition));
 
    return v < PSigDisposition_ENUM_COUNT;
 }
