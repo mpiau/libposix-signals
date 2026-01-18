@@ -12,7 +12,7 @@
 struct StdSigProperties
 {
    int rawSignal;
-   PSigDisp disposition;
+   PSigDisposition disposition;
    char const *name;
    char const *desc;
 };
@@ -37,37 +37,37 @@ typedef struct RTSigProperties RTSigProperties;
    }
 static constexpr StdSigProperties S_STD_SIGNALS_PROPS[] =
 {
-     CG_STDSIG_PROPS(PSignal_SIGHUP,    SIGHUP,    PSigDisp_TERMINATE, "Terminal Hang-Up / Process Death Detected")
-   , CG_STDSIG_PROPS(PSignal_SIGINT,    SIGINT,    PSigDisp_TERMINATE, "User Interrupt (Ctrl+C)")
-   , CG_STDSIG_PROPS(PSignal_SIGQUIT,   SIGQUIT,   PSigDisp_CORE_DUMP, "Quit from keyboard")
-   , CG_STDSIG_PROPS(PSignal_SIGILL,    SIGILL,    PSigDisp_CORE_DUMP, "Illegal Instruction")
-   , CG_STDSIG_PROPS(PSignal_SIGTRAP,   SIGTRAP,   PSigDisp_CORE_DUMP, "Trace / Breakpoint trap")
-   , CG_STDSIG_PROPS(PSignal_SIGABRT,   SIGABRT,   PSigDisp_CORE_DUMP, "Abort signal")
-   , CG_STDSIG_PROPS(PSignal_SIGBUS,    SIGBUS,    PSigDisp_CORE_DUMP, "Bus error (bad memory access)")
-   , CG_STDSIG_PROPS(PSignal_SIGFPE,    SIGFPE,    PSigDisp_CORE_DUMP, "Erroneous arithmetic operation")
-   , CG_STDSIG_PROPS(PSignal_SIGKILL,   SIGKILL,   PSigDisp_TERMINATE, "Kill signal")
-   , CG_STDSIG_PROPS(PSignal_SIGUSR1,   SIGUSR1,   PSigDisp_TERMINATE, "User-defined signal 1")
-   , CG_STDSIG_PROPS(PSignal_SIGSEGV,   SIGSEGV,   PSigDisp_CORE_DUMP, "Invalid memory reference (Segmentation Fault)")
-   , CG_STDSIG_PROPS(PSignal_SIGUSR2,   SIGUSR2,   PSigDisp_TERMINATE, "User-defined signal 2")
-   , CG_STDSIG_PROPS(PSignal_SIGPIPE,   SIGPIPE,   PSigDisp_TERMINATE, "Broken pipe: write to pipe with no readers")
-   , CG_STDSIG_PROPS(PSignal_SIGALRM,   SIGALRM,   PSigDisp_TERMINATE, "Timer signal")
-   , CG_STDSIG_PROPS(PSignal_SIGTERM,   SIGTERM,   PSigDisp_TERMINATE, "Termination signal")
-   , CG_STDSIG_PROPS(PSignal_SIGSTKFLT, SIGSTKFLT, PSigDisp_TERMINATE, "Stack fault on coprocessor")
-   , CG_STDSIG_PROPS(PSignal_SIGCHLD,   SIGCHLD,   PSigDisp_CONTINUE,  "Child stopped, terminated, or continued")
-   , CG_STDSIG_PROPS(PSignal_SIGCONT,   SIGCONT,   PSigDisp_CONTINUE,  "Continue if stopped")
-   , CG_STDSIG_PROPS(PSignal_SIGSTOP,   SIGSTOP,   PSigDisp_STOP,      "Stop process")
-   , CG_STDSIG_PROPS(PSignal_SIGTSTP,   SIGTSTP,   PSigDisp_STOP,      "Stop typed at terminal")
-   , CG_STDSIG_PROPS(PSignal_SIGTTIN,   SIGTTIN,   PSigDisp_STOP,      "Terminal input for background process")
-   , CG_STDSIG_PROPS(PSignal_SIGTTOU,   SIGTTOU,   PSigDisp_STOP,      "Terminal output for background process")
-   , CG_STDSIG_PROPS(PSignal_SIGURG,    SIGURG,    PSigDisp_IGNORE,    "Urgent condition on socket")
-   , CG_STDSIG_PROPS(PSignal_SIGXCPU,   SIGXCPU,   PSigDisp_CORE_DUMP, "CPU time limit exceeded")
-   , CG_STDSIG_PROPS(PSignal_SIGXFSZ,   SIGXFSZ,   PSigDisp_CORE_DUMP, "File size limit exceeded")
-   , CG_STDSIG_PROPS(PSignal_SIGVTALRM, SIGVTALRM, PSigDisp_TERMINATE, "Virtual alarm clock")
-   , CG_STDSIG_PROPS(PSignal_SIGPROF,   SIGPROF,   PSigDisp_TERMINATE, "Profiling timer expired")
-   , CG_STDSIG_PROPS(PSignal_SIGWINCH,  SIGWINCH,  PSigDisp_IGNORE,    "Window resize signal")
-   , CG_STDSIG_PROPS(PSignal_SIGIO,     SIGIO,     PSigDisp_TERMINATE, "I/O now possible")
-   , CG_STDSIG_PROPS(PSignal_SIGPWR,    SIGPWR,    PSigDisp_TERMINATE, "Power failure (System V)")
-   , CG_STDSIG_PROPS(PSignal_SIGSYS,    SIGSYS,    PSigDisp_CORE_DUMP, "Bad system call (SVr4)")
+     CG_STDSIG_PROPS(PSignal_SIGHUP,    SIGHUP,    PSigDisposition_TERMINATE, "Terminal Hang-Up / Process Death Detected")
+   , CG_STDSIG_PROPS(PSignal_SIGINT,    SIGINT,    PSigDisposition_TERMINATE, "User Interrupt (Ctrl+C)")
+   , CG_STDSIG_PROPS(PSignal_SIGQUIT,   SIGQUIT,   PSigDisposition_CORE_DUMP, "Quit from keyboard")
+   , CG_STDSIG_PROPS(PSignal_SIGILL,    SIGILL,    PSigDisposition_CORE_DUMP, "Illegal Instruction")
+   , CG_STDSIG_PROPS(PSignal_SIGTRAP,   SIGTRAP,   PSigDisposition_CORE_DUMP, "Trace / Breakpoint trap")
+   , CG_STDSIG_PROPS(PSignal_SIGABRT,   SIGABRT,   PSigDisposition_CORE_DUMP, "Abort signal")
+   , CG_STDSIG_PROPS(PSignal_SIGBUS,    SIGBUS,    PSigDisposition_CORE_DUMP, "Bus error (bad memory access)")
+   , CG_STDSIG_PROPS(PSignal_SIGFPE,    SIGFPE,    PSigDisposition_CORE_DUMP, "Erroneous arithmetic operation")
+   , CG_STDSIG_PROPS(PSignal_SIGKILL,   SIGKILL,   PSigDisposition_TERMINATE, "Kill signal")
+   , CG_STDSIG_PROPS(PSignal_SIGUSR1,   SIGUSR1,   PSigDisposition_TERMINATE, "User-defined signal 1")
+   , CG_STDSIG_PROPS(PSignal_SIGSEGV,   SIGSEGV,   PSigDisposition_CORE_DUMP, "Invalid memory reference (Segmentation Fault)")
+   , CG_STDSIG_PROPS(PSignal_SIGUSR2,   SIGUSR2,   PSigDisposition_TERMINATE, "User-defined signal 2")
+   , CG_STDSIG_PROPS(PSignal_SIGPIPE,   SIGPIPE,   PSigDisposition_TERMINATE, "Broken pipe: write to pipe with no readers")
+   , CG_STDSIG_PROPS(PSignal_SIGALRM,   SIGALRM,   PSigDisposition_TERMINATE, "Timer signal")
+   , CG_STDSIG_PROPS(PSignal_SIGTERM,   SIGTERM,   PSigDisposition_TERMINATE, "Termination signal")
+   , CG_STDSIG_PROPS(PSignal_SIGSTKFLT, SIGSTKFLT, PSigDisposition_TERMINATE, "Stack fault on coprocessor")
+   , CG_STDSIG_PROPS(PSignal_SIGCHLD,   SIGCHLD,   PSigDisposition_CONTINUE,  "Child stopped, terminated, or continued")
+   , CG_STDSIG_PROPS(PSignal_SIGCONT,   SIGCONT,   PSigDisposition_CONTINUE,  "Continue if stopped")
+   , CG_STDSIG_PROPS(PSignal_SIGSTOP,   SIGSTOP,   PSigDisposition_STOP,      "Stop process")
+   , CG_STDSIG_PROPS(PSignal_SIGTSTP,   SIGTSTP,   PSigDisposition_STOP,      "Stop typed at terminal")
+   , CG_STDSIG_PROPS(PSignal_SIGTTIN,   SIGTTIN,   PSigDisposition_STOP,      "Terminal input for background process")
+   , CG_STDSIG_PROPS(PSignal_SIGTTOU,   SIGTTOU,   PSigDisposition_STOP,      "Terminal output for background process")
+   , CG_STDSIG_PROPS(PSignal_SIGURG,    SIGURG,    PSigDisposition_IGNORE,    "Urgent condition on socket")
+   , CG_STDSIG_PROPS(PSignal_SIGXCPU,   SIGXCPU,   PSigDisposition_CORE_DUMP, "CPU time limit exceeded")
+   , CG_STDSIG_PROPS(PSignal_SIGXFSZ,   SIGXFSZ,   PSigDisposition_CORE_DUMP, "File size limit exceeded")
+   , CG_STDSIG_PROPS(PSignal_SIGVTALRM, SIGVTALRM, PSigDisposition_TERMINATE, "Virtual alarm clock")
+   , CG_STDSIG_PROPS(PSignal_SIGPROF,   SIGPROF,   PSigDisposition_TERMINATE, "Profiling timer expired")
+   , CG_STDSIG_PROPS(PSignal_SIGWINCH,  SIGWINCH,  PSigDisposition_IGNORE,    "Window resize signal")
+   , CG_STDSIG_PROPS(PSignal_SIGIO,     SIGIO,     PSigDisposition_TERMINATE, "I/O now possible")
+   , CG_STDSIG_PROPS(PSignal_SIGPWR,    SIGPWR,    PSigDisposition_TERMINATE, "Power failure (System V)")
+   , CG_STDSIG_PROPS(PSignal_SIGSYS,    SIGSYS,    PSigDisposition_CORE_DUMP, "Bad system call (SVr4)")
 };
 #undef CG_STDSIG_PROPS
 
@@ -172,11 +172,11 @@ bool psignal_is_hookable(PSignal const psig)
    return (psig != PSignal_SIGKILL && psig != PSignal_SIGSTOP);
 }
 
-PSigDisp psignal_default_disposition(PSignal const psig)
+PSigDisposition psignal_default_disposition(PSignal const psig)
 {
    return psignal_is_standard(psig)
       ? S_STD_SIGNALS_PROPS[std_sig_idx(psig)].disposition
-      : PSigDisp_IGNORE;
+      : PSigDisposition_IGNORE;
 }
 
 

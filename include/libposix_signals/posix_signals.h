@@ -1,8 +1,5 @@
 #pragma once
 
-#include "posix_signal_dispositions.h"
-
-
 //================================================================================================
 // POSIX Signals
 //================================================================================================
@@ -137,7 +134,6 @@ typedef enum PSignal PSignal;
 
 [[nodiscard]] int  psignal_associated_raw_signal(PSignal);
 [[nodiscard]] bool psignal_is_hookable(PSignal);
-[[nodiscard]] PSigDisp psignal_default_disposition(PSignal);
 
 [[nodiscard]] char const *psignal_name(PSignal);
 [[nodiscard]] char const *psignal_desc(PSignal);
