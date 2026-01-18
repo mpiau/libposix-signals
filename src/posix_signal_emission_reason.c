@@ -5,14 +5,14 @@
 
 
 //================================================================================================
-// Internal Data
+// Private Data
 //================================================================================================
 
 static constexpr ascii UNSPECIFIED_REASON[] = "Unspecified reason";
 
 
 //================================================================================================
-// Internal functions
+// Private functions
 //================================================================================================
 
 static ascii const *sigill_signal_reason(sigcode const code)
@@ -150,7 +150,7 @@ static ascii const *other_signals_reason(sigcode const code)
 
 
 //================================================================================================
-// Public functions
+// Public API Functions
 //================================================================================================
 
 ascii const *sig_emission_reason(PSignal const sig, sigcode const code)

@@ -8,6 +8,9 @@ CompileFlags:
       - "-std=c23"
       - "-Wall"
       - "-Wextra"
+      # static constexpr are always marked as unused, even when used.
+      # Disabling that warning for the moment.
+      - "-Wno-unused-const-variable"
       # Note that include folders are added in compile_flags.txt.
       # because .clangd doesn't support relative paths, only full ones.
 ---

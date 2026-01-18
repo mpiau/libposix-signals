@@ -16,15 +16,14 @@ int main(void)
    assert(psig_library_is_running() == false);
 
    //
-   for (PSignal idx = PSignal_EnumFirst; idx <= PSignal_EnumLast; ++idx)
+   for (PSignal idx = PSignal_ENUM_FIRST; idx <= PSignal_ENUM_LAST; ++idx)
    {
-      int const rawSignal  = psignal_associated_raw_signal(idx);
+      int const rawSignal  = psignal_to_raw_signal(idx);
       char const *name     = psignal_name(idx);
       char const *desc     = psignal_desc(idx);
       char const *type     = psignal_is_standard(idx) ? "STANDARD" : "REAL-TIME";
-      char const *hookable = psignal_is_hookable(idx) ? " - HOOKABLE" : "";
 
-      printf("POSIX Signal %2i -> %-15s (%-45s) - %s%s\n", rawSignal, name, desc, type, hookable);
+      printf("POSIX Signal %2i -> %-15s (%-45s) - %s\n", rawSignal, name, desc, type);
    }
    printf("\nAll tests passed !\n");
 

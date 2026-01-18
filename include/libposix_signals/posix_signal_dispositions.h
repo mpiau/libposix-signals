@@ -18,7 +18,7 @@
    You can modify the disposition of both STD and RT signals (except for a few exceptions).
 */
 
-enum PSigDisposition : unsigned char
+typedef enum PSigDisposition : unsigned char
 {
      PSigDisposition_CONTINUE    // Continue the process if it's currently stopped.
    , PSigDisposition_CORE_DUMP   // Terminate the process and produces core dump file.
@@ -26,23 +26,18 @@ enum PSigDisposition : unsigned char
    , PSigDisposition_STOP        // Stop the process.
    , PSigDisposition_TERMINATE   // Terminate the process.
    , PSigDisposition_UNSPECIFIED // Not specified by POSIX, OS specific.
+} PSigDisposition;
 
-   //---------------------------------------------------------------------------------------------
-   // Helpers
-   //---------------------------------------------------------------------------------------------
+static constexpr unsigned PSigDisposition_ENUM_FIRST = PSigDisposition_CONTINUE;
+static constexpr unsigned PSigDisposition_ENUM_LAST  = PSigDisposition_UNSPECIFIED;
+static constexpr unsigned PSigDisposition_ENUM_COUNT = (PSigDisposition_ENUM_LAST - PSigDisposition_ENUM_FIRST) + 1;
 
-   , PSigDisposition_EnumFirst = PSigDisposition_CONTINUE
-   , PSigDisposition_EnumLast  = PSigDisposition_UNSPECIFIED
-   , PSigDisposition_EnumCount = (PSigDisposition_EnumLast - PSigDisposition_EnumFirst) + 1
-};
-
-typedef enum PSigDisposition PSigDisposition;
 
 typedef char ascii;
 
 
 //================================================================================================
-// API Functions
+// Public API Functions
 //================================================================================================
 
 //------------------------------------------------------------------------------------------------
@@ -51,9 +46,10 @@ typedef char ascii;
 
 /*
    Validates that the given value belongs to PSigDisposition.
+   All the functions taking a PSigDisposition WILL ASSUME that the given enum value is VALID.
 */
 [[nodiscard]]
-bool psignal_disposition_validate(unsigned char);
+bool psignal_disposition_validate(unsigned);
 
 
 //------------------------------------------------------------------------------------------------
@@ -90,4 +86,5 @@ void psignal_disposition_reset(PSignal);
    Returns a simple description for the current disposition. Useful for logging/debugging.
    Example: "Terminate" will be returned for PSigDisposition_TERMINATE.
 */
-[[nodiscard]] ascii const *psignal_disposition_desc(PSignal);
+[[nodiscard]]
+ascii const *psignal_disposition_desc(PSignal);

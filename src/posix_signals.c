@@ -6,7 +6,7 @@
 
 
 //================================================================================================
-// Internal Data
+// Private Data
 //================================================================================================
 
 struct StdSigProperties
@@ -108,69 +108,73 @@ static constexpr RTSigProperties S_RT_SIGNALS_PROPS[] =
 };
 
 
-static_assert(arrayCapacity(S_STD_SIGNALS_PROPS) == PSignal_EnumStdCount);
-static_assert(arrayCapacity(S_RT_SIGNALS_PROPS)  == PSignal_EnumRTCount);
+static_assert(arrayCapacity(S_STD_SIGNALS_PROPS) == PSignal_ENUM_STD_COUNT);
+static_assert(arrayCapacity(S_RT_SIGNALS_PROPS)  == PSignal_ENUM_RT_COUNT);
 
 
 //================================================================================================
-// Internal Functions
+// Private Functions
 //================================================================================================
 
 // We can't assume that STD/RT signals are 0-indexed so these functions are defined for that.
 
-[[nodiscard]] static inline unsigned int std_sig_idx(PSignal const psig)
+[[nodiscard]] static inline
+unsigned std_sig_idx(PSignal const psig)
 {
    assert(psignal_is_standard(psig));
-   return (psig - PSignal_EnumStdFirst);
+   return (psig - PSignal_ENUM_STD_FIRST);
 }
 
-[[nodiscard]] static inline unsigned int rt_sig_idx(PSignal const psig)
+[[nodiscard]] static inline
+unsigned rt_sig_idx(PSignal const psig)
 {
    assert(psignal_is_real_time(psig));
-   return (psig - PSignal_EnumRTFirst);
+   return (psig - PSignal_ENUM_RT_FIRST);
 }
 
 
 //================================================================================================
-// API Functions
+// Public API Functions
 //================================================================================================
 
 //------------------------------------------------------------------------------------------------
 // Identification
 //------------------------------------------------------------------------------------------------
 
-bool psignal_validate(int const v)
+bool psignal_validate(unsigned const v)
 {
-   return !(v < PSignal_EnumFirst || v > PSignal_EnumLast);
+   // The code below assumes that we start from 0 and enum is unsigned.
+   static_assert(PSignal_ENUM_STD_FIRST == 0 && (PSignal)-1 > 0);
+
+   return v <= PSignal_ENUM_LAST;
 }
 
 
 //------------------------------------------------------------------------------------------------
-// POSIX Signal Properties
+// Properties
 //------------------------------------------------------------------------------------------------
 
 bool psignal_is_real_time(PSignal const psig)
 {
-   return !(psig < PSignal_EnumRTFirst || psig > PSignal_EnumRTLast);
+   return !(psig < PSignal_ENUM_RT_FIRST || psig > PSignal_ENUM_RT_LAST);
 }
 
 bool psignal_is_standard(PSignal const psig)
 {
-   return !(psig < PSignal_EnumStdFirst || psig > PSignal_EnumStdLast);
+   // The code below assumes that we start from 0 and enum is unsigned.
+   static_assert(PSignal_ENUM_STD_FIRST == 0 && (PSignal)-1 > 0);
+
+   return psig <= PSignal_ENUM_STD_LAST;
 }
 
 
-int psignal_associated_raw_signal(PSignal const psig)
+int psignal_to_raw_signal(PSignal const psig)
 {
    return psignal_is_standard(psig)
       ? S_STD_SIGNALS_PROPS[std_sig_idx(psig)].rawSignal
       : SIGRTMIN + (int)rt_sig_idx(psig);
 }
 
-bool psignal_is_hookable(PSignal const psig)
-{
-   return (psig != PSignal_SIGKILL && psig != PSignal_SIGSTOP);
-}
 
 PSigDisposition psignal_default_disposition(PSignal const psig)
 {
@@ -196,13 +200,13 @@ char const *psignal_desc(PSignal const psig)
 
 
 //------------------------------------------------------------------------------------------------
-// Conversion functions
+// Conversion
 //------------------------------------------------------------------------------------------------
 
-bool psignal_try_from_raw_signal(int const signal, PSignal *const out)
+bool psignal_from_raw_signal(int const signal, PSignal *const out)
 {
    // STD Signals
-   for (PSignal idx = PSignal_EnumStdFirst; idx <= PSignal_EnumStdLast; ++idx)
+   for (PSignal idx = PSignal_ENUM_STD_FIRST; idx <= PSignal_ENUM_STD_LAST; ++idx)
    {
       if (S_STD_SIGNALS_PROPS[idx].rawSignal == signal)
       {
@@ -214,8 +218,7 @@ bool psignal_try_from_raw_signal(int const signal, PSignal *const out)
    // RT Signals
    if (!(signal < SIGRTMIN || signal > SIGRTMAX))
    {
-      *out = PSignal_EnumRTFirst + (signal - SIGRTMIN);
-      assert(*out <= PSignal_EnumRTLast);
+      *out = PSignal_ENUM_RT_FIRST + (signal - SIGRTMIN);
       return true;
    }
 
