@@ -31,12 +31,12 @@ static constexpr unsigned PSigDisposition_ENUM_LAST  = PSigDisposition_UNSPECIFI
 static constexpr unsigned PSigDisposition_ENUM_COUNT = (PSigDisposition_ENUM_LAST - PSigDisposition_ENUM_FIRST) + 1;
 
 
-typedef char ascii;
-
-
 //================================================================================================
 // Public API Functions
 //================================================================================================
+
+typedef char ascii;
+
 
 //------------------------------------------------------------------------------------------------
 // Validation
@@ -66,3 +66,14 @@ PSigDisposition psignal_disposition_default(PSignal);
 */
 [[nodiscard]]
 ascii const *psignal_disposition_desc(PSigDisposition);
+
+/*
+   Returns a Mask with bits set to true for all signals associated to the given disposition.
+   A bit is set based on PSignal values: (1 << PSignal).
+*/
+[[nodiscard]]
+PSignalMask psignal_disposition_mask(PSigDisposition);
+[[nodiscard]]
+PSignalMask psignal_disposition_mask_all(void);
+[[nodiscard]]
+PSignalMask psignal_disposition_mask_none(void);

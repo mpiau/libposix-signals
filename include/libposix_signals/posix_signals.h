@@ -1,5 +1,7 @@
 #pragma once
 
+#include <sys/types.h> // Necessary for pid_t
+
 //================================================================================================
 // POSIX Signals
 //================================================================================================
@@ -19,7 +21,6 @@
    To avoid polluting the global namespace with these macros and to abstract away the platform
    specific complexity, PSignal can be used as a reliable, uniform representation instead.
 */
-
 
 typedef enum PSignal : unsigned char
 {
@@ -119,6 +120,13 @@ static constexpr unsigned PSignal_ENUM_RT_COUNT  = (PSignal_ENUM_RT_LAST - PSign
 
 
 //================================================================================================
+// POSIX Signal Mask Type
+//================================================================================================
+
+typedef unsigned _BitInt(PSignal_ENUM_COUNT) PSignalMask;
+
+
+//================================================================================================
 // API Functions
 //================================================================================================
 
@@ -135,6 +143,19 @@ static constexpr unsigned PSignal_ENUM_RT_COUNT  = (PSignal_ENUM_RT_LAST - PSign
 */
 [[nodiscard]]
 bool psignal_validate(unsigned);
+
+
+//------------------------------------------------------------------------------------------------
+// Usage
+//------------------------------------------------------------------------------------------------
+
+/*
+   Raise the given signal to either your own process or the given one.
+   While kill() is used for STD signals, sigqueue() is used for RT signals.
+   Note that (for the moment ?), sending data alongside a RT signal isn't supported.
+*/
+[[nodiscard]] bool psignal_raise(PSignal);
+[[nodiscard]] bool psignal_raise_on_pid(PSignal, pid_t);
 
 
 //------------------------------------------------------------------------------------------------

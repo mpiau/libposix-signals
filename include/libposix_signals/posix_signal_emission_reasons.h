@@ -15,7 +15,6 @@
    can be extremely valuable.
 */
 
-typedef int  sigcode;
 typedef char ascii;
 
 
@@ -30,4 +29,4 @@ typedef char ascii;
    If no particular reason is found, a simple "Unspecified reason" will be returned.
 */
 [[nodiscard]]
-ascii const *psig_emission_reason(PSignal, sigcode);
+ascii const *psignal_emission_reason(PSignal, int sigcode);

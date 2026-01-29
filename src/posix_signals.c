@@ -1,9 +1,12 @@
+#define _GNU_SOURCE
+
 #include "libposix_signals/posix_signals.h"
 #include "libposix_signals/posix_signal_dispositions.h"
 #include "libmacros/macro_utils.h"
 
 #include <assert.h>
 #include <signal.h>
+#include <unistd.h>
 
 
 //================================================================================================
@@ -144,6 +147,29 @@ bool psignal_validate(unsigned const v)
    static_assert(PSignal_ENUM_STD_FIRST == 0 && type_is_unsigned(PSignal));
 
    return v <= PSignal_ENUM_LAST;
+}
+
+
+//------------------------------------------------------------------------------------------------
+// Usage
+//------------------------------------------------------------------------------------------------
+
+bool psignal_raise(PSignal const psig)
+{
+   return psignal_raise_on_pid(psig, getpid());
+}
+
+bool psignal_raise_on_pid(PSignal const psig, pid_t const pid)
+{
+   int const sig = psignal_to_raw_signal(psig);
+   if (psignal_is_standard(psig))
+   {
+      return kill(pid, sig) == 0;
+   }
+   else
+   {
+      return sigqueue(pid, sig, (union sigval){}) == 0;
+   }
 }
 
 

@@ -1,6 +1,7 @@
+#define _GNU_SOURCE
+
 #include "libposix_signals/posix_signal_emission_reasons.h"
 
-#define _GNU_SOURCE
 #include <signal.h>
 
 
@@ -15,7 +16,7 @@ static constexpr ascii UNSPECIFIED_REASON[] = "Unspecified reason";
 // Private functions
 //================================================================================================
 
-static ascii const *sigill_signal_reason(sigcode const code)
+static ascii const *sigill_signal_reason(int const code)
 {
    switch (code)
    {
@@ -33,7 +34,7 @@ static ascii const *sigill_signal_reason(sigcode const code)
    }
 }
 
-static ascii const *sigfpe_signal_reason(sigcode const code)
+static ascii const *sigfpe_signal_reason(int const code)
 {
    switch (code)
    {
@@ -52,7 +53,7 @@ static ascii const *sigfpe_signal_reason(sigcode const code)
    }
 }
 
-static ascii const *sigsegv_signal_reason(sigcode const code)
+static ascii const *sigsegv_signal_reason(int const code)
 {
    switch (code)
    {
@@ -71,7 +72,7 @@ static ascii const *sigsegv_signal_reason(sigcode const code)
    }
 }
 
-static ascii const *sigbus_signal_reason(sigcode const code)
+static ascii const *sigbus_signal_reason(int const code)
 {
    switch (code)
    {
@@ -85,7 +86,7 @@ static ascii const *sigbus_signal_reason(sigcode const code)
    }
 }
 
-static ascii const *sigtrap_signal_reason(sigcode const code)
+static ascii const *sigtrap_signal_reason(int const code)
 {
    switch (code)
    {
@@ -99,7 +100,7 @@ static ascii const *sigtrap_signal_reason(sigcode const code)
    }
 }
 
-static ascii const *sigchld_signal_reason(sigcode const code)
+static ascii const *sigchld_signal_reason(int const code)
 {
    switch (code)
    {
@@ -114,7 +115,7 @@ static ascii const *sigchld_signal_reason(sigcode const code)
    }
 }
 
-static ascii const *sigpoll_signal_reason(sigcode const code)
+static ascii const *sigpoll_signal_reason(int const code)
 {
    switch (code)
    {
@@ -129,7 +130,7 @@ static ascii const *sigpoll_signal_reason(sigcode const code)
    }
 }
 
-static ascii const *other_signals_reason(sigcode const code)
+static ascii const *other_signals_reason(int const code)
 {
    switch (code)
    {
@@ -153,7 +154,7 @@ static ascii const *other_signals_reason(sigcode const code)
 // Public API Functions
 //================================================================================================
 
-ascii const *sig_emission_reason(PSignal const sig, sigcode const code)
+ascii const *psignal_emission_reason(PSignal const sig, int const code)
 {
    switch(sig)
    {
