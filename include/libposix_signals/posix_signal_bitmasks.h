@@ -150,8 +150,7 @@ static constexpr PSignalBitmask PSIG_BITMASK_FATAL_SIGNALS
    POSIX standard.
 */
 static constexpr PSignalBitmask PSIG_BITMASK_UNHOOKABLE_SIGNALS
-   = (1ul << PSignal_SIGKILL)
-   | (1ul << PSignal_SIGSTOP);
+   = (1ul << PSignal_SIGKILL) | (1ul << PSignal_SIGSTOP);
 
 /*
    Bitmask representing all POSIX signals that can be hooked on according to the

@@ -38,15 +38,10 @@ static PSignalBitmask s_callbackedSignals = 0lu;
 static atomic_int s_initStatus = InitStatus_NOT_INIT;
 static void *s_alternateStack = nullptr;
 
+
 // ===============================================================================================
 // Internal Functions
 // ===============================================================================================
-
-[[nodiscard]]
-static inline bool is_signal_callbackable(PSignal const psig)
-{
-   return (psig != PSignal_SIGKILL && psig != PSignal_SIGSTOP);
-}
 
 [[nodiscard]]
 static inline bool has_available_slot(void)
@@ -134,10 +129,7 @@ static void sigaction_callback_entry_point(int const sig, siginfo_t *info, void 
 
 static bool callback_posix_signal(PSignal const psig)
 {
-   if (!is_signal_callbackable(psig))
-   {
-      return false;
-   }
+   assert((psig & PSIG_BITMASK_UNHOOKABLE_SIGNALS) == 0);
 
    struct sigaction sa = {};
    sigemptyset(&sa.sa_mask);
@@ -158,10 +150,7 @@ static bool callback_posix_signal(PSignal const psig)
 
 static bool uncallback_posix_signal(PSignal const psig)
 {
-   if (!is_signal_callbackable(psig))
-   {
-      return true;
-   }
+   assert((psig & PSIG_BITMASK_UNHOOKABLE_SIGNALS) == 0);
 
    struct sigaction sa = {};
    sigemptyset(&sa.sa_mask);
@@ -175,7 +164,7 @@ static bool uncallback_posix_signal(PSignal const psig)
    return success;
 }
 
-static bool refresh_signal_callbacks(void)
+static bool refresh_signal_hooks(void)
 {
    PSignalBitmask sumCallbackMask = PSIG_BITMASK_NONE;
    for (unsigned idx = 0; idx < s_nbSlotsUsed; ++idx)
@@ -209,10 +198,10 @@ static bool refresh_signal_callbacks(void)
    return success;
 }
 
-static bool reset_signal_callbacks(void)
+static bool reset_signal_hooks(void)
 {
    s_nbSlotsUsed = 0;
-   return refresh_signal_callbacks();
+   return refresh_signal_hooks();
 }
 
 [[nodiscard]]
@@ -287,7 +276,7 @@ void psignal_callback_system_shutdown(void)
    }
 
    stack_restore_default();
-   reset_signal_callbacks();
+   reset_signal_hooks();
 
    assert(s_callbackedSignals == PSIG_BITMASK_NONE);
    assert(s_nbSlotsUsed == 0);
@@ -308,7 +297,7 @@ bool psignal_callback_register(PSigCallback const callback, PSignalBitmask const
    if (slot != nullptr)
    {
       slot->sigBitmask |= hookableBitmask;
-      return refresh_signal_callbacks();
+      return refresh_signal_hooks();
    }
    return false;
 }
@@ -347,6 +336,6 @@ void psignal_callback_unregister(PSigCallback const callback, PSignalBitmask con
       {
          slot_remove(callback);
       }
-      refresh_signal_callbacks();
+      refresh_signal_hooks();
    }
 }
