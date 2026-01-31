@@ -8,13 +8,13 @@ static sig_atomic_t sigintReceived = 0;
 static sig_atomic_t sigsegvReceived = 0;
 static sig_atomic_t sigcontReceived = 0;
 
-void crash_callback(PSigCallbackInfo const *info)
+void crash_callback(PSigHookData const *data)
 {
    printf("Crash callback called with signal %s (%i)\n",
-      psignal_name(info->sig), psignal_to_raw_signal(info->sig)
+      psignal_name(data->psig), psignal_to_raw_signal(data->psig)
    );
 
-   switch (info->sig)
+   switch (data->psig)
    {
       case PSignal_SIGINT: sigintReceived += 1; break;
       case PSignal_SIGSEGV: sigsegvReceived += 1; break;
@@ -26,13 +26,15 @@ void crash_callback(PSigCallbackInfo const *info)
 
 int main(void)
 {
-   printf("Running tests for \"%s\"...\n", psignal_library_description());
+   printf("Running tests for libposix-signals\n");
 
-   assert(psignal_library_init() == true);
-   assert(psignal_library_init() == true);
-   assert(psignal_library_is_running() == true);
+   PSigSystemOptions const opts = { .useAlternateStack = true };
 
-   for (PSignal idx = PSignal_ENUM_FIRST; idx <= PSignal_ENUM_LAST; ++idx)
+   assert(psignal_callback_system_init(&opts));
+   assert(psignal_callback_system_init(nullptr));
+   assert(psignal_callback_system_is_init());
+
+   for (PSignal idx = PSignal_First; idx < PSignal_Count; ++idx)
    {
       int const rawSignal  = psignal_to_raw_signal(idx);
       char const *name     = psignal_name(idx);
@@ -42,24 +44,14 @@ int main(void)
       printf("POSIX Signal %2i -> %-15s (%-45s) - %s\n", rawSignal, name, desc, type);
    }
 
-   assert(psignal_callback_hook_on_disposition(PSigDisposition_TERMINATE, crash_callback));
-   assert(psignal_callback_hook_on_disposition(PSigDisposition_CORE_DUMP, crash_callback));
-   assert(psignal_callback_hook_on_disposition(PSigDisposition_STOP, crash_callback));
-   for (PSignal idx = PSignal_ENUM_FIRST; idx <= PSignal_ENUM_LAST; ++idx)
-   {
-      PSigDisposition const disp = psignal_disposition_default(idx);
-      bool const shouldBeHooked =
-          ( disp == PSigDisposition_TERMINATE
-         || disp == PSigDisposition_CORE_DUMP
-         || disp == PSigDisposition_STOP);
-      assert(psignal_callback_is_hooked_on(idx, crash_callback) == shouldBeHooked);
-   }
+   assert(psignal_callback_register(crash_callback, PSIG_BITMASK_FATAL_SIGNALS));
 
-   psignal_callback_remove_from_sig(PSignal_SIGINT, crash_callback);
-   assert(!psignal_callback_is_hooked_on(PSignal_SIGINT, crash_callback));
+   PSignalBitmask const SigintMask = (1ul << PSignal_SIGINT);
+   psignal_callback_unregister(crash_callback, SigintMask);
+   assert(!psignal_callback_is_registered_on(crash_callback, SigintMask));
 
-   assert(psignal_callback_hook_on_sig(PSignal_SIGINT, crash_callback));
-   assert(psignal_callback_is_hooked_on(PSignal_SIGINT, crash_callback));
+   assert(psignal_callback_register(crash_callback, SigintMask));
+   assert(psignal_callback_is_registered_on(crash_callback, PSIG_BITMASK_FATAL_SIGNALS));
 
    printf("Raising hooked SIGINT...\n");
    assert(psignal_raise(PSignal_SIGINT));
@@ -71,17 +63,15 @@ int main(void)
    assert(psignal_raise(PSignal_SIGCONT));
    assert(sigcontReceived == 0);
 
-   psignal_callback_remove_from_all(crash_callback);
-   for (PSignal idx = PSignal_ENUM_FIRST; idx <= PSignal_ENUM_LAST; ++idx)
-   {
-      assert(!psignal_callback_is_hooked_on(idx, crash_callback));
-   }
+   assert(psignal_callback_is_registered(crash_callback) == true);
+   psignal_callback_unregister(crash_callback, PSIG_BITMASK_ALL);
+   assert(!psignal_callback_is_registered_on(crash_callback, PSIG_BITMASK_FATAL_SIGNALS));
+   assert(psignal_callback_is_registered(crash_callback) == false);
 
-
-   psignal_library_shutdown();
-   assert(psignal_library_is_running() == false);
-   psignal_library_shutdown();
-   assert(psignal_library_is_running() == false);
+   psignal_callback_system_shutdown();
+   assert(psignal_callback_system_is_init() == false);
+   psignal_callback_system_shutdown();
+   assert(psignal_callback_system_is_init() == false);
 
    printf("\nAll tests passed !\n");
 

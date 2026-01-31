@@ -1,40 +1,51 @@
 #pragma once
 
-#include "posix_signal_dispositions.h"
-#include "posix_signals.h"
+#include "posix_signal_bitmasks.h"
 
 
 //================================================================================================
 // POSIX Signal Callbacks
 //================================================================================================
 
-typedef struct PSigCallbackInfo
+struct PSigSystemOptions
 {
-   PSignal sig;
+   bool useAlternateStack;
+};
+typedef struct PSigSystemOptions PSigSystemOptions;
+
+struct PSigHookData
+{
+   PSignal psig;
    int sigCode;
    // TODO to fill with more information given by sigaction's callback.
-} PSigCallbackInfo;
+};
+typedef struct PSigHookData PSigHookData;
 
-typedef void (*PSigCallback)(PSigCallbackInfo const *);
+typedef void (*PSigCallback)(PSigHookData const *);
 
 /*
    Controls the number of callbacks that can be supported at the same time.
-   Having the same callback hooked on multiple signals (even through multiple calls) only count
-   as one.
+   Having the same callback registered on multiple signals (even through multiple calls)
+   will still only takes one slot.
 */
-static constexpr unsigned PSIG_CALLBACKS_MAX_CAPACITY = 16u;
+static constexpr unsigned PSIG_CALLBACK_MAX_SLOTS_CAPACITY = 16u;
+
 
 // ===============================================================================================
 // Public API Functions
 // ===============================================================================================
 
-[[nodiscard]] bool psignal_callback_is_authorized(PSignal);
-[[nodiscard]] bool psignal_callback_is_hooked_on(PSignal, PSigCallback);
+// TODO: Documentation.
 
-[[nodiscard]] bool psignal_callback_hook_on_sig(PSignal, PSigCallback);
-[[nodiscard]] bool psignal_callback_hook_on_disposition(PSigDisposition, PSigCallback);
-[[nodiscard]] bool psignal_callback_hook_on_all(PSigCallback);
+[[nodiscard]] bool psignal_callback_system_init(PSigSystemOptions const *);
+[[nodiscard]] bool psignal_callback_system_is_init(void);
+void psignal_callback_system_shutdown(void);
 
-void psignal_callback_remove_from_sig(PSignal, PSigCallback);
-void psignal_callback_remove_from_disposition(PSigDisposition, PSigCallback);
-void psignal_callback_remove_from_all(PSigCallback);
+// NOTE
+// Even if given, the implementation discards automtically SIGKILL/SIGSTOP from the request.
+// Do we want that kind of hidden behaviour ?
+
+[[nodiscard]] bool psignal_callback_register(PSigCallback, PSignalBitmask);
+[[nodiscard]] bool psignal_callback_is_registered_on(PSigCallback, PSignalBitmask);
+[[nodiscard]] bool psignal_callback_is_registered(PSigCallback);
+void psignal_callback_unregister(PSigCallback, PSignalBitmask);

@@ -1,13 +1,11 @@
 #define _GNU_SOURCE
 
 #include "libposix_signals/posix_signal_callbacks.h"
-#include "libposix_signals/posix_signal_dispositions.h"
-#include "libposix_signals/posix_signals.h"
-
 #include "libmacros/macro_utils.h"
 
 #include <assert.h>
 #include <signal.h>
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -16,140 +14,97 @@
 // Internal Data
 // ===============================================================================================
 
-typedef struct CallbackSlot
+enum InitStatus : int
 {
-   PSigCallback callback;
-   PSignalMask  hookedMask;
-} CallbackSlot;
+   InitStatus_NOT_INIT,
+   InitStatus_INITIALIZING,
+   InitStatus_INIT,
+   InitStatus_SHUTTING_DOWN
+};
+typedef enum InitStatus InitStatus;
 
-static CallbackSlot s_cbSlots[PSIG_CALLBACKS_MAX_CAPACITY] = {};
-static unsigned s_cbSlotsUsed = 0u;
+struct CallbackSlot
+{
+   PSigCallback   callback;
+   PSignalBitmask sigBitmask;
+};
+typedef struct CallbackSlot CallbackSlot;
 
+
+static CallbackSlot s_slots[PSIG_CALLBACK_MAX_SLOTS_CAPACITY] = {};
+static unsigned s_nbSlotsUsed = 0u;
+
+static PSignalBitmask s_callbackedSignals = 0lu;
+static atomic_int s_initStatus = InitStatus_NOT_INIT;
+static void *s_alternateStack = nullptr;
 
 // ===============================================================================================
 // Internal Functions
 // ===============================================================================================
 
 [[nodiscard]]
-static inline bool has_available_slot(void)
+static inline bool is_signal_callbackable(PSignal const psig)
 {
-   return s_cbSlotsUsed < array_capacity(s_cbSlots);
+   return (psig != PSignal_SIGKILL && psig != PSignal_SIGSTOP);
 }
 
 [[nodiscard]]
-static inline bool is_signal_hooked(PSignalMask const mask, PSignal const psig)
+static inline bool has_available_slot(void)
 {
-   return (mask >> psig) & 1;
+   return s_nbSlotsUsed < array_capacity(s_slots);
 }
 
 [[nodiscard]] 
-static CallbackSlot *try_get_slot(PSigCallback const cb)
+static CallbackSlot *slot_try_get(PSigCallback const callback)
 {
-   for (unsigned i = 0; i < s_cbSlotsUsed; ++i)
+   for (unsigned i = 0; i < s_nbSlotsUsed; ++i)
    {
-      CallbackSlot *regCb = &s_cbSlots[i];
-      if (regCb->callback == cb)
+      CallbackSlot *slot = &s_slots[i];
+      if (slot->callback == callback)
       {
-         return regCb;
+         return slot;
       }
    }
-
    return nullptr;
 }
 
 [[nodiscard]]
-static CallbackSlot *register_new_slot(PSigCallback const cb)
+static CallbackSlot *slot_register(PSigCallback const callback)
 {
-   assert(!try_get_slot(cb));
-   assert(has_available_slot());
+   CallbackSlot *slot = &s_slots[s_nbSlotsUsed];
+   s_nbSlotsUsed += 1;
 
-   CallbackSlot *regCb = &s_cbSlots[s_cbSlotsUsed];
+   slot->callback = callback;
+   slot->sigBitmask = PSIG_BITMASK_NONE;
 
-   regCb->callback = cb;
-   regCb->hookedMask = psignal_disposition_mask_none();
-
-   s_cbSlotsUsed += 1;
-
-   return regCb;
+   return slot;
 }
 
-static void remove_from_slot(PSigCallback const cb)
+static void slot_remove(PSigCallback const callback)
 {
-   assert(s_cbSlotsUsed > 0);
-
-   for (unsigned i = 0; i < s_cbSlotsUsed; ++i)
+   for (unsigned i = 0; i < s_nbSlotsUsed; ++i)
    {
-      if (s_cbSlots[i].callback == cb)
+      if (s_slots[i].callback == callback)
       {
-         // As we don't care about the order of callbacks,
-         // simply copy the last slot into the removed one.
-         s_cbSlots[i] = s_cbSlots[s_cbSlotsUsed - 1];
-         s_cbSlotsUsed -= 1;
+         // We don't care about the order of callbacks,
+         // Simply copy the last active slot into the now empty one.
+         s_slots[i] = s_slots[s_nbSlotsUsed - 1];
+         s_nbSlotsUsed -= 1;
          return;
       }
    }
-
-   // Note:
-   // Slot not found, do we want to emit an error here or simply discard that fact ?
 }
 
 [[nodiscard]]
-static CallbackSlot *try_get_or_register_new_slot(PSigCallback const cb)
+static CallbackSlot *slot_try_get_or_register(PSigCallback const callback)
 {
-   CallbackSlot *regCb = try_get_slot(cb);
+   CallbackSlot *const slot = slot_try_get(callback);
 
-   if (regCb == nullptr && has_available_slot())
+   if (slot == nullptr && has_available_slot())
    {
-      regCb = register_new_slot(cb);
+      return slot_register(callback);
    }
-
-   return regCb;
-}
-
-[[nodiscard]]
-static bool upgrade_slot(PSigCallback const cb, PSignalMask const mask)
-{
-   CallbackSlot *regCb = try_get_or_register_new_slot(cb);
-   if (regCb != nullptr)
-   {
-      regCb->hookedMask |= mask;
-      return true;
-   }
-
-   return false;
-}
-
-static void downgrade_slot(PSigCallback const cb, PSignalMask const mask)
-{
-   CallbackSlot *regCb = try_get_slot(cb);
-   if (regCb)
-   {
-      regCb->hookedMask &= ~(mask);
-      if (regCb->hookedMask == psignal_disposition_mask_none())
-      {
-         remove_from_slot(cb);
-      }
-   }
-}
-
-[[nodiscard]]
-static bool setup_alternate_stack(void)
-{
-   unsigned const stackSize = SIGSTKSZ;
-   void *const stackBuffer = malloc(stackSize);
-
-   if (stackBuffer == nullptr)
-   {
-      return false;
-   }
-
-   stack_t const stack = (stack_t) {
-      .ss_sp = stackBuffer,
-      .ss_size = stackSize,
-      .ss_flags = 0
-   };
-
-   return (sigaltstack(&stack, nullptr) == 0);
+   return slot;
 }
 
 static void sigaction_callback_entry_point(int const sig, siginfo_t *info, void *context)
@@ -161,29 +116,28 @@ static void sigaction_callback_entry_point(int const sig, siginfo_t *info, void 
       exit(sig);
    }
 
-   PSigCallbackInfo const cbInfo = (PSigCallbackInfo) {
-      .sig = psig,
+   PSigHookData const data = (PSigHookData) {
+      .psig = psig,
       .sigCode = (info ? info->si_signo : 0)
    };
 
-   for (unsigned i = 0; i < s_cbSlotsUsed; ++i)
+   for (unsigned i = 0; i < s_nbSlotsUsed; ++i)
    {
-      CallbackSlot const *regCb = &s_cbSlots[i];
-      if (is_signal_hooked(regCb->hookedMask, psig))
+      CallbackSlot const *slot = &s_slots[i];
+      if (slot->sigBitmask & psig)
       {
-         regCb->callback(&cbInfo);
+         slot->callback(&data);
       }
    }
 }
 
-// ===============================================================================================
-// Internal API Functions
-// ===============================================================================================
 
-bool psignal_callback_internal_init(void)
+static bool callback_posix_signal(PSignal const psig)
 {
-   if (!setup_alternate_stack())
+   if (!is_signal_callbackable(psig))
+   {
       return false;
+   }
 
    struct sigaction sa = {};
    sigemptyset(&sa.sa_mask);
@@ -194,36 +148,104 @@ bool psignal_callback_internal_init(void)
    sa.sa_flags = SA_NODEFER | SA_SIGINFO | SA_ONSTACK;
    sa.sa_sigaction = &sigaction_callback_entry_point;
 
-   for (PSignal idx = PSignal_ENUM_FIRST; idx <= PSignal_ENUM_LAST; ++idx)
+   bool const success = sigaction(psignal_to_raw_signal(psig), &sa, nullptr) == 0;
+   if (success)
    {
-      if (!psignal_callback_is_authorized(idx))
-         continue;
-
-      int const rawSignal = psignal_to_raw_signal(idx);
-      if (sigaction(rawSignal, &sa, nullptr) != 0)
-      {
-         fprintf(stderr, "ERROR - Failure to hook callback on \"%s\" (%i).\n", psignal_name(idx), rawSignal);
-         return false;
-      }
+      s_callbackedSignals |= (1ul << psig);
    }
-   return true;
+   return success;
 }
 
-void psignal_callback_internal_shutdown(void)
+static bool uncallback_posix_signal(PSignal const psig)
 {
+   if (!is_signal_callbackable(psig))
+   {
+      return true;
+   }
+
    struct sigaction sa = {};
    sigemptyset(&sa.sa_mask);
    sa.sa_handler = SIG_DFL;
 
-   for (PSignal idx = PSignal_ENUM_FIRST; idx <= PSignal_ENUM_LAST; ++idx)
+   bool const success = sigaction(psignal_to_raw_signal(psig), &sa, nullptr) == 0;
+   if (success)
    {
-      if (psignal_callback_is_authorized(idx))
-      {
-         sigaction(psignal_to_raw_signal(idx), &sa, nullptr);
-      }
+      s_callbackedSignals &= ~(1ul << psig);
+   }
+   return success;
+}
+
+static bool refresh_signal_callbacks(void)
+{
+   PSignalBitmask sumCallbackMask = PSIG_BITMASK_NONE;
+   for (unsigned idx = 0; idx < s_nbSlotsUsed; ++idx)
+   {
+      sumCallbackMask |= s_slots[idx].sigBitmask;
    }
 
-   s_cbSlotsUsed = 0;
+   if (sumCallbackMask == s_callbackedSignals)
+   {
+      // No callback to add/remove.
+      return true;
+   }
+
+   bool success = true;
+   for (PSignal sig = PSignal_First; sig < PSignal_Count; ++sig)
+   {
+      bool const currentState = (s_callbackedSignals >> sig) & 1;
+      bool const desiredState = (sumCallbackMask >> sig) & 1;
+
+      if (!currentState && desiredState)
+      {
+         // Signal has at least one callback and requires a callback now.
+         success &= callback_posix_signal(sig);
+      }
+      else if (currentState && !desiredState)
+      {
+         // Signal doesn't have any callback attached to it anymore.
+         success &= uncallback_posix_signal(sig);
+      }
+   }
+   return success;
+}
+
+static bool reset_signal_callbacks(void)
+{
+   s_nbSlotsUsed = 0;
+   return refresh_signal_callbacks();
+}
+
+[[nodiscard]]
+static bool setup_alternate_stack(void)
+{
+   // TODO: Might be better to use mmap instead of malloc here.
+   unsigned const stackSize = SIGSTKSZ;
+   s_alternateStack = malloc(stackSize);
+
+   if (s_alternateStack == nullptr)
+   {
+      return false;
+   }
+
+   stack_t const stack = (stack_t) {
+      .ss_sp = s_alternateStack,
+      .ss_size = stackSize,
+      .ss_flags = 0
+   };
+
+   return (sigaltstack(&stack, nullptr) == 0);
+}
+
+static void stack_restore_default(void)
+{
+   stack_t ss;
+   ss.ss_flags = SS_DISABLE;
+   sigaltstack(&ss, nullptr);
+   if (s_alternateStack)
+   {
+      free(s_alternateStack);
+      s_alternateStack = nullptr;
+   }
 }
 
 
@@ -231,45 +253,100 @@ void psignal_callback_internal_shutdown(void)
 // Public API Functions
 // ===============================================================================================
 
-bool psignal_callback_is_authorized(PSignal const psig)
+bool psignal_callback_system_init(PSigSystemOptions const *options)
 {
-   return (psig != PSignal_SIGKILL && psig != PSignal_SIGSTOP);
-}
+   InitStatus expected = InitStatus_NOT_INIT;
+   if (!atomic_compare_exchange_strong(&s_initStatus, &expected, InitStatus_INITIALIZING))
+   {
+      return psignal_callback_system_is_init();
+   }
 
-bool psignal_callback_is_hooked_on(PSignal const psig, PSigCallback const cb)
-{
-   CallbackSlot const *regCb = try_get_slot(cb);
-   return (regCb != nullptr) ? is_signal_hooked(regCb->hookedMask, psig) : false;
-}
+   bool success = true;
+   if (options && options->useAlternateStack)
+   {
+      success &= setup_alternate_stack();
+   }
 
-
-bool psignal_callback_hook_on_sig(PSignal const psig, PSigCallback const cb)
-{
-   return upgrade_slot(cb, (1lu << psig));
-}
-
-bool psignal_callback_hook_on_disposition(PSigDisposition const disp, PSigCallback const cb)
-{
-   return upgrade_slot(cb, psignal_disposition_mask(disp));
-}
-
-bool psignal_callback_hook_on_all(PSigCallback const cb)
-{
-   return upgrade_slot(cb, psignal_disposition_mask_all());
+   atomic_store(&s_initStatus, success ? InitStatus_INIT : InitStatus_NOT_INIT);
+   return psignal_callback_system_is_init();
 }
 
 
-void psignal_callback_remove_from_sig(PSignal const psig, PSigCallback const cb)
+bool psignal_callback_system_is_init(void)
 {
-   downgrade_slot(cb, (1lu << psig));
+   return atomic_load(&s_initStatus) == InitStatus_INIT;
 }
 
-void psignal_callback_remove_from_disposition(PSigDisposition const disp, PSigCallback const cb)
+
+void psignal_callback_system_shutdown(void)
 {
-   downgrade_slot(cb, (psignal_disposition_mask(disp)));
+   InitStatus expected = InitStatus_INIT;
+   if (!atomic_compare_exchange_strong(&s_initStatus, &expected, InitStatus_SHUTTING_DOWN))
+   {
+      return;
+   }
+
+   stack_restore_default();
+   reset_signal_callbacks();
+
+   assert(s_callbackedSignals == PSIG_BITMASK_NONE);
+   assert(s_nbSlotsUsed == 0);
+   assert(s_alternateStack == nullptr);
+
+   atomic_store(&s_initStatus, InitStatus_NOT_INIT);
 }
 
-void psignal_callback_remove_from_all(PSigCallback const cb)
+bool psignal_callback_register(PSigCallback const callback, PSignalBitmask const bitmask)
 {
-   downgrade_slot(cb, psignal_disposition_mask_all());
+   PSignalBitmask const hookableBitmask = (bitmask & PSIG_BITMASK_HOOKABLE_SIGNALS);
+   if (hookableBitmask == PSIG_BITMASK_NONE)
+   {
+      return false;
+   }
+
+   CallbackSlot *const slot = slot_try_get_or_register(callback);
+   if (slot != nullptr)
+   {
+      slot->sigBitmask |= hookableBitmask;
+      return refresh_signal_callbacks();
+   }
+   return false;
+}
+
+bool psignal_callback_is_registered_on(PSigCallback const callback, PSignalBitmask const bitmask)
+{
+   PSignalBitmask const hookableBitmask = (bitmask & PSIG_BITMASK_HOOKABLE_SIGNALS);
+   if (hookableBitmask == PSIG_BITMASK_NONE)
+   {
+      return false;
+   }
+
+   CallbackSlot *const slot = slot_try_get(callback);
+   if (slot)
+   {
+      return (slot->sigBitmask & hookableBitmask) == hookableBitmask;
+   }
+
+   return false;
+}
+
+bool psignal_callback_is_registered(PSigCallback const callback)
+{
+   return slot_try_get(callback) != nullptr;
+}
+
+void psignal_callback_unregister(PSigCallback const callback, PSignalBitmask const bitmask)
+{
+   PSignalBitmask const hookableBitmask = (bitmask & PSIG_BITMASK_HOOKABLE_SIGNALS);
+   CallbackSlot *const slot = slot_try_get(callback);
+   if (slot)
+   {
+      PSignalBitmask const currentlyOnToRemove = slot->sigBitmask & hookableBitmask;
+      slot->sigBitmask &= ~(currentlyOnToRemove);
+      if (slot->sigBitmask == PSIG_BITMASK_NONE)
+      {
+         slot_remove(callback);
+      }
+      refresh_signal_callbacks();
+   }
 }

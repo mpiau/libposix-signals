@@ -2,6 +2,7 @@
 
 #include <sys/types.h> // Necessary for pid_t
 
+
 //================================================================================================
 // POSIX Signals
 //================================================================================================
@@ -22,7 +23,7 @@
    specific complexity, PSignal can be used as a reliable, uniform representation instead.
 */
 
-typedef enum PSignal : unsigned char
+enum PSignal : unsigned char
 {
    //---------------------------------------------------------------------------------------------
    // POSIX Standard Signals
@@ -104,26 +105,29 @@ typedef enum PSignal : unsigned char
    , PSignal_SIGRTMAX_2  // Real-time signal 28
    , PSignal_SIGRTMAX_1  // Real-time signal 29
    , PSignal_SIGRTMAX    // Real-time signal 30
-} PSignal;
-
-static constexpr unsigned PSignal_ENUM_FIRST     = PSignal_SIGHUP;
-static constexpr unsigned PSignal_ENUM_LAST      = PSignal_SIGRTMAX;
-static constexpr unsigned PSignal_ENUM_COUNT     = (PSignal_ENUM_LAST - PSignal_ENUM_FIRST) + 1;
-
-static constexpr unsigned PSignal_ENUM_STD_FIRST = PSignal_SIGHUP;
-static constexpr unsigned PSignal_ENUM_STD_LAST  = PSignal_SIGSYS;
-static constexpr unsigned PSignal_ENUM_STD_COUNT = (PSignal_ENUM_STD_LAST - PSignal_ENUM_STD_FIRST) + 1;
-
-static constexpr unsigned PSignal_ENUM_RT_FIRST  = PSignal_SIGRTMIN;
-static constexpr unsigned PSignal_ENUM_RT_LAST   = PSignal_SIGRTMAX;
-static constexpr unsigned PSignal_ENUM_RT_COUNT  = (PSignal_ENUM_RT_LAST - PSignal_ENUM_RT_FIRST) + 1;
 
 
-//================================================================================================
-// POSIX Signal Mask Type
-//================================================================================================
+   //---------------------------------------------------------------------------------------------
+   // Helpers
+   //---------------------------------------------------------------------------------------------
 
-typedef unsigned _BitInt(PSignal_ENUM_COUNT) PSignalMask;
+   , PSignal_Count
+   , PSignal_First = PSignal_SIGHUP
+   , PSignal_Last  = PSignal_SIGRTMAX
+
+   , PSignal_StandardFirst = PSignal_SIGHUP
+   , PSignal_StandardLast  = PSignal_SIGSYS
+   , PSignal_StandardCount = PSignal_StandardLast - PSignal_StandardFirst + 1
+
+   , PSignal_RealtimeFirst = PSignal_SIGRTMIN
+   , PSignal_RealtimeLast  = PSignal_SIGRTMAX
+   , PSignal_RealtimeCount = PSignal_RealtimeLast - PSignal_RealtimeFirst + 1
+};
+typedef enum PSignal PSignal;
+
+static_assert(PSignal_Last - PSignal_First + 1              == PSignal_Count);
+static_assert(PSignal_StandardCount + PSignal_RealtimeCount == PSignal_Count);
+static_assert(PSignal_StandardLast + 1 == PSignal_RealtimeFirst);
 
 
 //================================================================================================
@@ -141,8 +145,7 @@ typedef unsigned _BitInt(PSignal_ENUM_COUNT) PSignalMask;
    - Enum values != raw signal value. Use psignal_from_raw_signal instead for raw signal values.
    - All the functions taking a PSignal WILL ASSUME that the given enum value is VALID.
 */
-[[nodiscard]]
-bool psignal_validate(unsigned);
+[[nodiscard]] bool psignal_validate(unsigned);
 
 
 //------------------------------------------------------------------------------------------------
@@ -154,8 +157,8 @@ bool psignal_validate(unsigned);
    While kill() is used for STD signals, sigqueue() is used for RT signals.
    Note that (for the moment ?), sending data alongside a RT signal isn't supported.
 */
-[[nodiscard]] bool psignal_raise(PSignal);
-[[nodiscard]] bool psignal_raise_on_pid(PSignal, pid_t);
+bool psignal_raise(PSignal);
+bool psignal_raise_on_pid(PSignal, pid_t);
 
 
 //------------------------------------------------------------------------------------------------
@@ -165,35 +168,30 @@ bool psignal_validate(unsigned);
 /*
    Returns true if the given PSignal is mapped to a standard POSIX signal.
 */
-[[nodiscard]]
-bool psignal_is_standard(PSignal);
+[[nodiscard]] bool psignal_is_standard(PSignal);
 
 /*
    Returns true if the given PSignal is mapped to a Real-Time POSIX signal.
 */
-[[nodiscard]]
-bool psignal_is_real_time(PSignal);
+[[nodiscard]] bool psignal_is_real_time(PSignal);
 
 /*
    Returns the "raw" signal value mapped to the enum.
    Example: PSignal_SIGINT will returns the value defined by SIGINT macro.
 */
-[[nodiscard]]
-int psignal_to_raw_signal(PSignal);
+[[nodiscard]] int psignal_to_raw_signal(PSignal);
 
 /*
    Returns the name associated to a given PSignal.
    Example: PSignal_SIGSEGV will returns "SIGSEGV".
 */
-[[nodiscard]]
-char const *psignal_name(PSignal);
+[[nodiscard]] char const *psignal_name(PSignal);
 
 /*
    Returns the description associated to a given PSignal.
    Example: PSignal_SIGSEGV will returns "Invalid memory reference (Segmentation Fault)"
 */
-[[nodiscard]]
-char const *psignal_desc(PSignal);
+[[nodiscard]] char const *psignal_desc(PSignal);
 
 
 //------------------------------------------------------------------------------------------------
@@ -206,5 +204,4 @@ char const *psignal_desc(PSignal);
    Example: Given SIGINT, PSignal_SIGINT will be set and true returned.
    Example: Given 0xFFFF, false will be returned.
 */
-[[nodiscard]]
-bool psignal_from_raw_signal(int, PSignal *);
+[[nodiscard]] bool psignal_from_raw_signal(int, PSignal *);

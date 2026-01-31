@@ -1,136 +1,136 @@
 #define _GNU_SOURCE
 
 #include "libposix_signals/posix_signals.h"
-#include "libposix_signals/posix_signal_dispositions.h"
+#include "libposix_signals/posix_signal_bitmasks.h"
 #include "libmacros/macro_utils.h"
 
-#include <assert.h>
 #include <signal.h>
+#include <stddef.h>
 #include <unistd.h>
 
 
 //================================================================================================
-// Private Data
+// Internal Data
 //================================================================================================
 
-struct StdSigProperties
+struct StdSigLookupTable
 {
-   int rawSignal;
+   PSignal psig;
+   int     rawSig;
+};
+typedef struct StdSigLookupTable StdSigLookupTable;
+
+static constexpr StdSigLookupTable S_STDSIG_LOOKUP_TABLE[] = 
+{
+     (StdSigLookupTable){ PSignal_SIGHUP,    SIGHUP    }
+   , (StdSigLookupTable){ PSignal_SIGINT,    SIGINT    }
+   , (StdSigLookupTable){ PSignal_SIGQUIT,   SIGQUIT   }
+   , (StdSigLookupTable){ PSignal_SIGILL,    SIGILL    }
+   , (StdSigLookupTable){ PSignal_SIGTRAP,   SIGTRAP   }
+   , (StdSigLookupTable){ PSignal_SIGABRT,   SIGABRT   }
+   , (StdSigLookupTable){ PSignal_SIGBUS,    SIGBUS    }
+   , (StdSigLookupTable){ PSignal_SIGFPE,    SIGFPE    }
+   , (StdSigLookupTable){ PSignal_SIGKILL,   SIGKILL   }
+   , (StdSigLookupTable){ PSignal_SIGUSR1,   SIGUSR1   }
+   , (StdSigLookupTable){ PSignal_SIGSEGV,   SIGSEGV   }
+   , (StdSigLookupTable){ PSignal_SIGUSR2,   SIGUSR2   }
+   , (StdSigLookupTable){ PSignal_SIGPIPE,   SIGPIPE   }
+   , (StdSigLookupTable){ PSignal_SIGALRM,   SIGALRM   }
+   , (StdSigLookupTable){ PSignal_SIGTERM,   SIGTERM   }
+   , (StdSigLookupTable){ PSignal_SIGSTKFLT, SIGSTKFLT }
+   , (StdSigLookupTable){ PSignal_SIGCHLD,   SIGCHLD   }
+   , (StdSigLookupTable){ PSignal_SIGCONT,   SIGCONT   }
+   , (StdSigLookupTable){ PSignal_SIGSTOP,   SIGSTOP   }
+   , (StdSigLookupTable){ PSignal_SIGTSTP,   SIGTSTP   }
+   , (StdSigLookupTable){ PSignal_SIGTTIN,   SIGTTIN   }
+   , (StdSigLookupTable){ PSignal_SIGTTOU,   SIGTTOU   }
+   , (StdSigLookupTable){ PSignal_SIGURG,    SIGURG    }
+   , (StdSigLookupTable){ PSignal_SIGXCPU,   SIGXCPU   }
+   , (StdSigLookupTable){ PSignal_SIGXFSZ,   SIGXFSZ   }
+   , (StdSigLookupTable){ PSignal_SIGVTALRM, SIGVTALRM }
+   , (StdSigLookupTable){ PSignal_SIGPROF,   SIGPROF   }
+   , (StdSigLookupTable){ PSignal_SIGWINCH,  SIGWINCH  }
+   , (StdSigLookupTable){ PSignal_SIGIO,     SIGIO     }
+   , (StdSigLookupTable){ PSignal_SIGPWR,    SIGPWR    }
+   , (StdSigLookupTable){ PSignal_SIGSYS,    SIGSYS    }
+};
+
+struct SigSymbols
+{
    char const *name;
    char const *desc;
 };
-typedef struct StdSigProperties StdSigProperties;
+typedef struct SigSymbols SigSymbols;
 
-struct RTSigProperties
+static constexpr SigSymbols S_SIGNAL_SYMBOLS[] =
 {
-   char const *name;
-   char const *desc;
-};
-typedef struct RTSigProperties RTSigProperties;
+     (SigSymbols){ "SIGHUP",    "Terminal Hang-Up / Process Death Detected"     }
+   , (SigSymbols){ "SIGINT",    "User Interrupt (Ctrl+C)"                       }
+   , (SigSymbols){ "SIGQUIT",   "Quit from keyboard"                            }
+   , (SigSymbols){ "SIGILL",    "Illegal Instruction"                           }
+   , (SigSymbols){ "SIGTRAP",   "Trace / Breakpoint trap"                       }
+   , (SigSymbols){ "SIGABRT",   "Abort signal"                                  }
+   , (SigSymbols){ "SIGBUS",    "Bus error (bad memory access)"                 }
+   , (SigSymbols){ "SIGFPE",    "Erroneous arithmetic operation"                }
+   , (SigSymbols){ "SIGKILL",   "Kill signal"                                   }
+   , (SigSymbols){ "SIGUSR1",   "User-defined signal 1"                         }
+   , (SigSymbols){ "SIGSEGV",   "Invalid memory reference (Segmentation Fault)" }
+   , (SigSymbols){ "SIGUSR2",   "User-defined signal 2"                         }
+   , (SigSymbols){ "SIGPIPE",   "Broken pipe: write to pipe with no readers"    }
+   , (SigSymbols){ "SIGALRM",   "Timer signal"                                  }
+   , (SigSymbols){ "SIGTERM",   "Termination signal"                            }
+   , (SigSymbols){ "SIGSTKFLT", "Stack fault on coprocessor"                    }
+   , (SigSymbols){ "SIGCHLD",   "Child stopped, terminated, or continued"       }
+   , (SigSymbols){ "SIGCONT",   "Continue if stopped"                           }
+   , (SigSymbols){ "SIGSTOP",   "Stop process"                                  }
+   , (SigSymbols){ "SIGTSTP",   "Stop typed at terminal"                        }
+   , (SigSymbols){ "SIGTTIN",   "Terminal input for background process"         }
+   , (SigSymbols){ "SIGTTOU",   "Terminal output for background process"        }
+   , (SigSymbols){ "SIGURG",    "Urgent condition on socket"                    }
+   , (SigSymbols){ "SIGXCPU",   "CPU time limit exceeded"                       }
+   , (SigSymbols){ "SIGXFSZ",   "File size limit exceeded"                      }
+   , (SigSymbols){ "SIGVTALRM", "Virtual alarm clock"                           }
+   , (SigSymbols){ "SIGPROF",   "Profiling timer expired"                       }
+   , (SigSymbols){ "SIGWINCH",  "Window resize signal"                          }
+   , (SigSymbols){ "SIGIO",     "I/O now possible"                              }
+   , (SigSymbols){ "SIGPWR",    "Power failure (System V)"                      }
+   , (SigSymbols){ "SIGSYS",    "Bad system call (SVr4)"                        }
 
+   , (SigSymbols){ "SIGRTMIN",      "Real-time signal 0"  }
+   , (SigSymbols){ "SIGRTMIN + 1",  "Real-time signal 1"  }
+   , (SigSymbols){ "SIGRTMIN + 2",  "Real-time signal 2"  }
+   , (SigSymbols){ "SIGRTMIN + 3",  "Real-time signal 3"  }
+   , (SigSymbols){ "SIGRTMIN + 4",  "Real-time signal 4"  }
+   , (SigSymbols){ "SIGRTMIN + 5",  "Real-time signal 5"  }
+   , (SigSymbols){ "SIGRTMIN + 6",  "Real-time signal 6"  }
+   , (SigSymbols){ "SIGRTMIN + 7",  "Real-time signal 7"  }
+   , (SigSymbols){ "SIGRTMIN + 8",  "Real-time signal 8"  }
+   , (SigSymbols){ "SIGRTMIN + 9",  "Real-time signal 9"  }
+   , (SigSymbols){ "SIGRTMIN + 10", "Real-time signal 10" }
+   , (SigSymbols){ "SIGRTMIN + 11", "Real-time signal 11" }
+   , (SigSymbols){ "SIGRTMIN + 12", "Real-time signal 12" }
+   , (SigSymbols){ "SIGRTMIN + 13", "Real-time signal 13" }
+   , (SigSymbols){ "SIGRTMIN + 14", "Real-time signal 14" }
+   , (SigSymbols){ "SIGRTMIN + 15", "Real-time signal 15" }
 
-#define CG_STDSIG_PROPS(pSig, pRaw, pDesc)  \
-   [pSig] = (StdSigProperties) { \
-      .rawSignal = pRaw,         \
-      .name = #pRaw,             \
-      .desc = pDesc              \
-   }
-static constexpr StdSigProperties S_STD_SIGNALS_PROPS[] =
-{
-     CG_STDSIG_PROPS(PSignal_SIGHUP,    SIGHUP,    "Terminal Hang-Up / Process Death Detected")
-   , CG_STDSIG_PROPS(PSignal_SIGINT,    SIGINT,    "User Interrupt (Ctrl+C)")
-   , CG_STDSIG_PROPS(PSignal_SIGQUIT,   SIGQUIT,   "Quit from keyboard")
-   , CG_STDSIG_PROPS(PSignal_SIGILL,    SIGILL,    "Illegal Instruction")
-   , CG_STDSIG_PROPS(PSignal_SIGTRAP,   SIGTRAP,   "Trace / Breakpoint trap")
-   , CG_STDSIG_PROPS(PSignal_SIGABRT,   SIGABRT,   "Abort signal")
-   , CG_STDSIG_PROPS(PSignal_SIGBUS,    SIGBUS,    "Bus error (bad memory access)")
-   , CG_STDSIG_PROPS(PSignal_SIGFPE,    SIGFPE,    "Erroneous arithmetic operation")
-   , CG_STDSIG_PROPS(PSignal_SIGKILL,   SIGKILL,   "Kill signal")
-   , CG_STDSIG_PROPS(PSignal_SIGUSR1,   SIGUSR1,   "User-defined signal 1")
-   , CG_STDSIG_PROPS(PSignal_SIGSEGV,   SIGSEGV,   "Invalid memory reference (Segmentation Fault)")
-   , CG_STDSIG_PROPS(PSignal_SIGUSR2,   SIGUSR2,   "User-defined signal 2")
-   , CG_STDSIG_PROPS(PSignal_SIGPIPE,   SIGPIPE,   "Broken pipe: write to pipe with no readers")
-   , CG_STDSIG_PROPS(PSignal_SIGALRM,   SIGALRM,   "Timer signal")
-   , CG_STDSIG_PROPS(PSignal_SIGTERM,   SIGTERM,   "Termination signal")
-   , CG_STDSIG_PROPS(PSignal_SIGSTKFLT, SIGSTKFLT, "Stack fault on coprocessor")
-   , CG_STDSIG_PROPS(PSignal_SIGCHLD,   SIGCHLD,   "Child stopped, terminated, or continued")
-   , CG_STDSIG_PROPS(PSignal_SIGCONT,   SIGCONT,   "Continue if stopped")
-   , CG_STDSIG_PROPS(PSignal_SIGSTOP,   SIGSTOP,   "Stop process")
-   , CG_STDSIG_PROPS(PSignal_SIGTSTP,   SIGTSTP,   "Stop typed at terminal")
-   , CG_STDSIG_PROPS(PSignal_SIGTTIN,   SIGTTIN,   "Terminal input for background process")
-   , CG_STDSIG_PROPS(PSignal_SIGTTOU,   SIGTTOU,   "Terminal output for background process")
-   , CG_STDSIG_PROPS(PSignal_SIGURG,    SIGURG,    "Urgent condition on socket")
-   , CG_STDSIG_PROPS(PSignal_SIGXCPU,   SIGXCPU,   "CPU time limit exceeded")
-   , CG_STDSIG_PROPS(PSignal_SIGXFSZ,   SIGXFSZ,   "File size limit exceeded")
-   , CG_STDSIG_PROPS(PSignal_SIGVTALRM, SIGVTALRM, "Virtual alarm clock")
-   , CG_STDSIG_PROPS(PSignal_SIGPROF,   SIGPROF,   "Profiling timer expired")
-   , CG_STDSIG_PROPS(PSignal_SIGWINCH,  SIGWINCH,  "Window resize signal")
-   , CG_STDSIG_PROPS(PSignal_SIGIO,     SIGIO,     "I/O now possible")
-   , CG_STDSIG_PROPS(PSignal_SIGPWR,    SIGPWR,    "Power failure (System V)")
-   , CG_STDSIG_PROPS(PSignal_SIGSYS,    SIGSYS,    "Bad system call (SVr4)")
-};
-#undef CG_STDSIG_PROPS
-
-static constexpr RTSigProperties S_RT_SIGNALS_PROPS[] =
-{
-     (RTSigProperties) { .name = "SIGRTMIN",      .desc = "Real-time signal 0" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 1",  .desc = "Real-time signal 1" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 2",  .desc = "Real-time signal 2" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 3",  .desc = "Real-time signal 3" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 4",  .desc = "Real-time signal 4" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 5",  .desc = "Real-time signal 5" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 6",  .desc = "Real-time signal 6" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 7",  .desc = "Real-time signal 7" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 8",  .desc = "Real-time signal 8" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 9",  .desc = "Real-time signal 9" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 10", .desc = "Real-time signal 10" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 11", .desc = "Real-time signal 11" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 12", .desc = "Real-time signal 12" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 13", .desc = "Real-time signal 13" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 14", .desc = "Real-time signal 14" }
-   , (RTSigProperties) { .name = "SIGRTMIN + 15", .desc = "Real-time signal 15" }
-
-   , (RTSigProperties) { .name = "SIGRTMAX - 14", .desc = "Real-time signal 16" }
-   , (RTSigProperties) { .name = "SIGRTMAX - 13", .desc = "Real-time signal 17" }
-   , (RTSigProperties) { .name = "SIGRTMAX - 12", .desc = "Real-time signal 18" }
-   , (RTSigProperties) { .name = "SIGRTMAX - 11", .desc = "Real-time signal 19" }
-   , (RTSigProperties) { .name = "SIGRTMAX - 10", .desc = "Real-time signal 20" }
-   , (RTSigProperties) { .name = "SIGRTMAX - 9",  .desc = "Real-time signal 21" }
-   , (RTSigProperties) { .name = "SIGRTMAX - 8",  .desc = "Real-time signal 22" }
-   , (RTSigProperties) { .name = "SIGRTMAX - 7",  .desc = "Real-time signal 23" }
-   , (RTSigProperties) { .name = "SIGRTMAX - 6",  .desc = "Real-time signal 24" }
-   , (RTSigProperties) { .name = "SIGRTMAX - 5",  .desc = "Real-time signal 25" }
-   , (RTSigProperties) { .name = "SIGRTMAX - 4",  .desc = "Real-time signal 26" }
-   , (RTSigProperties) { .name = "SIGRTMAX - 3",  .desc = "Real-time signal 27" }
-   , (RTSigProperties) { .name = "SIGRTMAX - 2",  .desc = "Real-time signal 28" }
-   , (RTSigProperties) { .name = "SIGRTMAX - 1",  .desc = "Real-time signal 29" }
-   , (RTSigProperties) { .name = "SIGRTMAX",      .desc = "Real-time signal 30" }
+   , (SigSymbols){ "SIGRTMAX - 14", "Real-time signal 16" }
+   , (SigSymbols){ "SIGRTMAX - 13", "Real-time signal 17" }
+   , (SigSymbols){ "SIGRTMAX - 12", "Real-time signal 18" }
+   , (SigSymbols){ "SIGRTMAX - 11", "Real-time signal 19" }
+   , (SigSymbols){ "SIGRTMAX - 10", "Real-time signal 20" }
+   , (SigSymbols){ "SIGRTMAX - 9",  "Real-time signal 21" }
+   , (SigSymbols){ "SIGRTMAX - 8",  "Real-time signal 22" }
+   , (SigSymbols){ "SIGRTMAX - 7",  "Real-time signal 23" }
+   , (SigSymbols){ "SIGRTMAX - 6",  "Real-time signal 24" }
+   , (SigSymbols){ "SIGRTMAX - 5",  "Real-time signal 25" }
+   , (SigSymbols){ "SIGRTMAX - 4",  "Real-time signal 26" }
+   , (SigSymbols){ "SIGRTMAX - 3",  "Real-time signal 27" }
+   , (SigSymbols){ "SIGRTMAX - 2",  "Real-time signal 28" }
+   , (SigSymbols){ "SIGRTMAX - 1",  "Real-time signal 29" }
+   , (SigSymbols){ "SIGRTMAX",      "Real-time signal 30" }
 };
 
-
-static_assert(array_capacity(S_STD_SIGNALS_PROPS) == PSignal_ENUM_STD_COUNT);
-static_assert(array_capacity(S_RT_SIGNALS_PROPS)  == PSignal_ENUM_RT_COUNT);
-
-
-//================================================================================================
-// Private Functions
-//================================================================================================
-
-// We can't assume that STD/RT signals are 0-indexed so these functions are defined for that.
-
-[[nodiscard]] static inline
-unsigned std_sig_idx(PSignal const psig)
-{
-   assert(psignal_is_standard(psig));
-   return (psig - PSignal_ENUM_STD_FIRST);
-}
-
-[[nodiscard]] static inline
-unsigned rt_sig_idx(PSignal const psig)
-{
-   assert(psignal_is_real_time(psig));
-   return (psig - PSignal_ENUM_RT_FIRST);
-}
+static_assert(array_capacity(S_SIGNAL_SYMBOLS) == PSignal_Count);
 
 
 //================================================================================================
@@ -143,10 +143,8 @@ unsigned rt_sig_idx(PSignal const psig)
 
 bool psignal_validate(unsigned const v)
 {
-   // The code below assumes that we start from 0 and enum is unsigned.
-   static_assert(PSignal_ENUM_STD_FIRST == 0 && type_is_unsigned(PSignal));
-
-   return v <= PSignal_ENUM_LAST;
+   static_assert(type_is_unsigned(PSignal), "This function assumes PSignal being unsigned.");
+   return v < PSignal_Count;
 }
 
 
@@ -179,36 +177,29 @@ bool psignal_raise_on_pid(PSignal const psig, pid_t const pid)
 
 bool psignal_is_standard(PSignal const psig)
 {
-   // The code below assumes that we start from 0 and enum is unsigned.
-   static_assert(PSignal_ENUM_STD_FIRST == 0 && type_is_unsigned(PSignal));
-
-   return psig <= PSignal_ENUM_STD_LAST;
+   return PSIG_BITMASK_STANDARD_SIGNALS & (1ul << psig);
 }
 
 bool psignal_is_real_time(PSignal const psig)
 {
-   return !(psig < PSignal_ENUM_RT_FIRST || psig > PSignal_ENUM_RT_LAST);
+   return PSIG_BITMASK_REALTIME_SIGNALS & (1ul << psig);
 }
 
 int psignal_to_raw_signal(PSignal const psig)
 {
    return psignal_is_standard(psig)
-      ? S_STD_SIGNALS_PROPS[std_sig_idx(psig)].rawSignal
-      : SIGRTMIN + (int)rt_sig_idx(psig);
+      ? S_STDSIG_LOOKUP_TABLE[psig].rawSig
+      : SIGRTMIN + (psig - PSignal_SIGRTMIN);
 }
 
 char const *psignal_name(PSignal const psig)
 {
-   return psignal_is_standard(psig)
-      ? S_STD_SIGNALS_PROPS[std_sig_idx(psig)].name
-      : S_RT_SIGNALS_PROPS[rt_sig_idx(psig)].name;
+   return S_SIGNAL_SYMBOLS[psig].name;
 }
 
 char const *psignal_desc(PSignal const psig)
 {
-   return psignal_is_standard(psig)
-      ? S_STD_SIGNALS_PROPS[std_sig_idx(psig)].desc
-      : S_RT_SIGNALS_PROPS[rt_sig_idx(psig)].desc;
+   return S_SIGNAL_SYMBOLS[psig].desc;
 }
 
 
@@ -216,23 +207,23 @@ char const *psignal_desc(PSignal const psig)
 // Conversion
 //------------------------------------------------------------------------------------------------
 
-bool psignal_from_raw_signal(int const signal, PSignal *const out)
+bool psignal_from_raw_signal(int const sig, PSignal *const out)
 {
-   // STD Signals
-   for (PSignal idx = PSignal_ENUM_STD_FIRST; idx <= PSignal_ENUM_STD_LAST; ++idx)
+   if (!(sig < SIGRTMIN || sig > SIGRTMAX))
    {
-      if (S_STD_SIGNALS_PROPS[idx].rawSignal == signal)
-      {
-         *out = idx;
-         return true;
-      }
+      *out = PSignal_SIGRTMIN + (sig - SIGRTMIN);
+      return true;
    }
 
-   // RT Signals
-   if (!(signal < SIGRTMIN || signal > SIGRTMAX))
+   constexpr unsigned TABLE_SIZE = array_capacity(S_STDSIG_LOOKUP_TABLE);
+   for (unsigned idx = 0; idx < TABLE_SIZE; ++idx)
    {
-      *out = PSignal_ENUM_RT_FIRST + (signal - SIGRTMIN);
-      return true;
+      StdSigLookupTable const *elem = &S_STDSIG_LOOKUP_TABLE[idx];
+      if (elem->rawSig == sig)
+      {
+         *out = elem->psig;
+         return true;
+      }
    }
 
    return false;
