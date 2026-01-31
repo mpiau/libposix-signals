@@ -179,7 +179,7 @@ bool psignal_raise_on_pid(PSignal, pid_t);
    Returns the "raw" signal value mapped to the enum.
    Example: PSignal_SIGINT will returns the value defined by SIGINT macro.
 */
-[[nodiscard]] int psignal_to_raw_signal(PSignal);
+[[nodiscard]] int psignal_into_raw_signal(PSignal);
 
 /*
    Returns the name associated to a given PSignal.

@@ -44,6 +44,12 @@ static void *s_alternateStack = nullptr;
 // ===============================================================================================
 
 [[nodiscard]]
+static inline PSignalBitmask psignal_into_bitmask(PSignal const psig)
+{
+   return (1ul << psig);
+}
+
+[[nodiscard]]
 static inline bool has_available_slot(void)
 {
    return s_nbSlotsUsed < array_capacity(s_slots);
@@ -119,7 +125,7 @@ static void sigaction_callback_entry_point(int const sig, siginfo_t *info, void 
    for (unsigned i = 0; i < s_nbSlotsUsed; ++i)
    {
       CallbackSlot const *slot = &s_slots[i];
-      if (slot->sigBitmask & psig)
+      if (slot->sigBitmask & psignal_into_bitmask(psig))
       {
          slot->callback(&data);
       }
@@ -140,10 +146,10 @@ static bool callback_posix_signal(PSignal const psig)
    sa.sa_flags = SA_NODEFER | SA_SIGINFO | SA_ONSTACK;
    sa.sa_sigaction = &sigaction_callback_entry_point;
 
-   bool const success = sigaction(psignal_to_raw_signal(psig), &sa, nullptr) == 0;
+   bool const success = sigaction(psignal_into_raw_signal(psig), &sa, nullptr) == 0;
    if (success)
    {
-      s_callbackedSignals |= (1ul << psig);
+      s_callbackedSignals |= psignal_into_bitmask(psig);
    }
    return success;
 }
@@ -156,10 +162,10 @@ static bool uncallback_posix_signal(PSignal const psig)
    sigemptyset(&sa.sa_mask);
    sa.sa_handler = SIG_DFL;
 
-   bool const success = sigaction(psignal_to_raw_signal(psig), &sa, nullptr) == 0;
+   bool const success = sigaction(psignal_into_raw_signal(psig), &sa, nullptr) == 0;
    if (success)
    {
-      s_callbackedSignals &= ~(1ul << psig);
+      s_callbackedSignals &= ~(psignal_into_bitmask(psig));
    }
    return success;
 }

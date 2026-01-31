@@ -11,7 +11,7 @@ static sig_atomic_t sigcontReceived = 0;
 void crash_callback(PSigHookData const *data)
 {
    printf("Crash callback called with signal %s (%i)\n",
-      psignal_name(data->psig), psignal_to_raw_signal(data->psig)
+      psignal_name(data->psig), psignal_into_raw_signal(data->psig)
    );
 
    switch (data->psig)
@@ -36,7 +36,7 @@ int main(void)
 
    for (PSignal idx = PSignal_First; idx < PSignal_Count; ++idx)
    {
-      int const rawSignal  = psignal_to_raw_signal(idx);
+      int const rawSignal  = psignal_into_raw_signal(idx);
       char const *name     = psignal_name(idx);
       char const *desc     = psignal_desc(idx);
       char const *type     = psignal_is_standard(idx) ? "STANDARD" : "REAL-TIME";

@@ -159,7 +159,7 @@ bool psignal_raise(PSignal const psig)
 
 bool psignal_raise_on_pid(PSignal const psig, pid_t const pid)
 {
-   int const sig = psignal_to_raw_signal(psig);
+   int const sig = psignal_into_raw_signal(psig);
    if (psignal_is_standard(psig))
    {
       return kill(pid, sig) == 0;
@@ -185,7 +185,7 @@ bool psignal_is_real_time(PSignal const psig)
    return PSIG_BITMASK_REALTIME_SIGNALS & (1ul << psig);
 }
 
-int psignal_to_raw_signal(PSignal const psig)
+int psignal_into_raw_signal(PSignal const psig)
 {
    return psignal_is_standard(psig)
       ? S_STDSIG_LOOKUP_TABLE[psig].rawSig
