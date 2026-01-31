@@ -310,19 +310,13 @@ bool psignal_callback_register(PSigCallback const callback, PSignalBitmask const
 
 bool psignal_callback_is_registered_on(PSigCallback const callback, PSignalBitmask const bitmask)
 {
-   PSignalBitmask const hookableBitmask = (bitmask & PSIG_BITMASK_HOOKABLE_SIGNALS);
-   if (hookableBitmask == PSIG_BITMASK_NONE)
+   if (!psignal_callback_is_registered(callback))
    {
       return false;
    }
 
-   CallbackSlot *const slot = slot_try_get(callback);
-   if (slot)
-   {
-      return (slot->sigBitmask & hookableBitmask) == hookableBitmask;
-   }
-
-   return false;
+   PSignalBitmask const hookableBitmask = (bitmask & PSIG_BITMASK_HOOKABLE_SIGNALS);
+   return (slot_try_get(callback)->sigBitmask & hookableBitmask) == hookableBitmask;
 }
 
 bool psignal_callback_is_registered(PSigCallback const callback)
@@ -330,18 +324,24 @@ bool psignal_callback_is_registered(PSigCallback const callback)
    return slot_try_get(callback) != nullptr;
 }
 
-void psignal_callback_unregister(PSigCallback const callback, PSignalBitmask const bitmask)
+bool psignal_callback_update(PSigCallback const callback, PSignalBitmask const bitmask)
 {
    PSignalBitmask const hookableBitmask = (bitmask & PSIG_BITMASK_HOOKABLE_SIGNALS);
    CallbackSlot *const slot = slot_try_get(callback);
    if (slot)
    {
-      PSignalBitmask const currentlyOnToRemove = slot->sigBitmask & hookableBitmask;
-      slot->sigBitmask &= ~(currentlyOnToRemove);
-      if (slot->sigBitmask == PSIG_BITMASK_NONE)
-      {
-         slot_remove(callback);
-      }
+      slot->sigBitmask = hookableBitmask;
+      refresh_signal_hooks();
+      return true;
+   }
+   return false;
+}
+
+void psignal_callback_unregister(PSigCallback const callback)
+{
+   if (psignal_callback_is_registered(callback))
+   {
+      slot_remove(callback);
       refresh_signal_hooks();
    }
 }

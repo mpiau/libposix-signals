@@ -47,10 +47,10 @@ int main(void)
    assert(psignal_callback_register(crash_callback, PSIG_BITMASK_FATAL_SIGNALS));
 
    PSignalBitmask const SigintMask = (1ul << PSignal_SIGINT);
-   psignal_callback_unregister(crash_callback, SigintMask);
+   assert(psignal_callback_update(crash_callback, PSIG_BITMASK_FATAL_SIGNALS ^ SigintMask));
    assert(!psignal_callback_is_registered_on(crash_callback, SigintMask));
 
-   assert(psignal_callback_register(crash_callback, SigintMask));
+   assert(psignal_callback_update(crash_callback, PSIG_BITMASK_FATAL_SIGNALS));
    assert(psignal_callback_is_registered_on(crash_callback, PSIG_BITMASK_FATAL_SIGNALS));
 
    printf("Raising hooked SIGINT...\n");
@@ -63,10 +63,10 @@ int main(void)
    assert(psignal_raise(PSignal_SIGCONT));
    assert(sigcontReceived == 0);
 
-   assert(psignal_callback_is_registered(crash_callback) == true);
-   psignal_callback_unregister(crash_callback, PSIG_BITMASK_ALL);
+   assert(psignal_callback_is_registered(crash_callback));
+   psignal_callback_unregister(crash_callback);
    assert(!psignal_callback_is_registered_on(crash_callback, PSIG_BITMASK_FATAL_SIGNALS));
-   assert(psignal_callback_is_registered(crash_callback) == false);
+   assert(!psignal_callback_is_registered(crash_callback));
 
    psignal_callback_system_shutdown();
    assert(psignal_callback_system_is_init() == false);

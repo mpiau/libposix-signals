@@ -48,4 +48,5 @@ void psignal_callback_system_shutdown(void);
 [[nodiscard]] bool psignal_callback_register(PSigCallback, PSignalBitmask);
 [[nodiscard]] bool psignal_callback_is_registered_on(PSigCallback, PSignalBitmask);
 [[nodiscard]] bool psignal_callback_is_registered(PSigCallback);
-void psignal_callback_unregister(PSigCallback, PSignalBitmask);
+[[nodiscard]] bool psignal_callback_update(PSigCallback, PSignalBitmask);
+void psignal_callback_unregister(PSigCallback);
