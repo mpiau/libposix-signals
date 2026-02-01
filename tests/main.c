@@ -102,6 +102,7 @@ int main(void)
 
    psignal_callback_unregister_all();
    assert(!psignal_callback_is_registered(crash_callback));
+   assert(!psignal_callback_is_registered(crash_callback_two));
 
    assert(psignal_restore_default_stack());
    assert(psignal_restore_default_stack()); // Should be ignored.

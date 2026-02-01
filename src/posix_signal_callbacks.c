@@ -73,7 +73,9 @@ static void sigaction_callback_entry_point(int const sig, siginfo_t *const info,
 
    PSigHookData const data = (PSigHookData) {
       .psig = psig,
-      .code = (info ? info->si_signo : 0)
+      .code = (info ? info->si_signo : 0),
+      .info = (void const *)info,
+      .context = (void const *)context
    };
 
    for (unsigned idx = 0; idx < s_nbSlotsUsed; ++idx)
@@ -121,7 +123,7 @@ static bool unhook_posix_signal(PSignal const psig)
 static void refresh_signal_hooks(void)
 {
    // Remove all unhookable signals from the mask.
-   // It would just waste CPU cycle to try for nothing to hook on them.
+   // It would just waste CPU cycle to try for nothing to hook them.
    PSignalMask const slotsHookableMask = (sum_slots_mask() & PSignalMask_HOOKABLE_SIGNALS);
    if (slotsHookableMask == s_hookedSignals)
    {

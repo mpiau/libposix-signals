@@ -8,11 +8,17 @@
 // POSIX Signal Callbacks
 //================================================================================================
 
+/*
+   Note: Simpler & safer for the moment to give the received structs from the hook instead of
+   extracting their content.
+*/
+
 struct PSigHookData
 {
    PSignal     psig;
    PSignalCode code;
-   // TODO to fill with more information given by sigaction's callback.
+   void const *info; // siginfo_t
+   void const *context; // ucontext_t
 };
 typedef struct PSigHookData PSigHookData;
 
