@@ -1,6 +1,6 @@
 #pragma once
 
-#include <sys/types.h> // Necessary for pid_t
+#include <sys/types.h>
 
 
 //================================================================================================
@@ -108,7 +108,7 @@ enum PSignal : unsigned char
 
 
    //---------------------------------------------------------------------------------------------
-   // Helpers
+   // Helper constants
    //---------------------------------------------------------------------------------------------
 
    , PSignal_Count
@@ -125,7 +125,7 @@ enum PSignal : unsigned char
 };
 typedef enum PSignal PSignal;
 
-static_assert(PSignal_Last - PSignal_First + 1              == PSignal_Count);
+static_assert(PSignal_Last - PSignal_First + 1 == PSignal_Count);
 static_assert(PSignal_StandardCount + PSignal_RealtimeCount == PSignal_Count);
 static_assert(PSignal_StandardLast + 1 == PSignal_RealtimeFirst);
 
@@ -153,11 +153,15 @@ static_assert(PSignal_StandardLast + 1 == PSignal_RealtimeFirst);
 //------------------------------------------------------------------------------------------------
 
 /*
-   Raise the given signal to either your own process or the given one.
+   Raise the given signal to your own process.
    While kill() is used for STD signals, sigqueue() is used for RT signals.
    Note that (for the moment ?), sending data alongside a RT signal isn't supported.
 */
 bool psignal_raise(PSignal);
+
+/*
+   Same as above, but send the signal to the given process instead.
+*/
 bool psignal_raise_on_pid(PSignal, pid_t);
 
 

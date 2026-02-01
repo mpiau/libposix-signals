@@ -1,9 +1,10 @@
 #define _GNU_SOURCE
 
 #include "libposix_signals/posix_signals.h"
-#include "libposix_signals/posix_signal_bitmasks.h"
+#include "libposix_signals/posix_signal_masks.h"
 #include "libmacros/macro_utils.h"
 
+#include <assert.h>
 #include <signal.h>
 #include <stddef.h>
 #include <unistd.h>
@@ -19,6 +20,14 @@ struct StdSigLookupTable
    int     rawSig;
 };
 typedef struct StdSigLookupTable StdSigLookupTable;
+
+struct SigSymbols
+{
+   char const *name;
+   char const *desc;
+};
+typedef struct SigSymbols SigSymbols;
+
 
 static constexpr StdSigLookupTable S_STDSIG_LOOKUP_TABLE[] = 
 {
@@ -54,13 +63,6 @@ static constexpr StdSigLookupTable S_STDSIG_LOOKUP_TABLE[] =
    , (StdSigLookupTable){ PSignal_SIGPWR,    SIGPWR    }
    , (StdSigLookupTable){ PSignal_SIGSYS,    SIGSYS    }
 };
-
-struct SigSymbols
-{
-   char const *name;
-   char const *desc;
-};
-typedef struct SigSymbols SigSymbols;
 
 static constexpr SigSymbols S_SIGNAL_SYMBOLS[] =
 {
@@ -130,6 +132,7 @@ static constexpr SigSymbols S_SIGNAL_SYMBOLS[] =
    , (SigSymbols){ "SIGRTMAX",      "Real-time signal 30" }
 };
 
+static_assert(array_capacity(S_STDSIG_LOOKUP_TABLE) == PSignal_StandardCount);
 static_assert(array_capacity(S_SIGNAL_SYMBOLS) == PSignal_Count);
 
 
@@ -154,20 +157,17 @@ bool psignal_validate(unsigned const v)
 
 bool psignal_raise(PSignal const psig)
 {
+   assert(psignal_validate(psig));
    return psignal_raise_on_pid(psig, getpid());
 }
 
 bool psignal_raise_on_pid(PSignal const psig, pid_t const pid)
 {
+   assert(psignal_validate(psig));
    int const sig = psignal_into_raw_signal(psig);
-   if (psignal_is_standard(psig))
-   {
-      return kill(pid, sig) == 0;
-   }
-   else
-   {
-      return sigqueue(pid, sig, (union sigval){}) == 0;
-   }
+   return psignal_is_standard(psig)
+      ? kill(pid, sig) == 0
+      : sigqueue(pid, sig, (union sigval){}) == 0;
 }
 
 
@@ -177,16 +177,19 @@ bool psignal_raise_on_pid(PSignal const psig, pid_t const pid)
 
 bool psignal_is_standard(PSignal const psig)
 {
-   return PSIG_BITMASK_STANDARD_SIGNALS & (1ul << psig);
+   assert(psignal_validate(psig));
+   return PSignalMask_STANDARD_SIGNALS & (1ul << psig);
 }
 
 bool psignal_is_real_time(PSignal const psig)
 {
-   return PSIG_BITMASK_REALTIME_SIGNALS & (1ul << psig);
+   assert(psignal_validate(psig));
+   return PSignalMask_REALTIME_SIGNALS & (1ul << psig);
 }
 
 int psignal_into_raw_signal(PSignal const psig)
 {
+   assert(psignal_validate(psig));
    return psignal_is_standard(psig)
       ? S_STDSIG_LOOKUP_TABLE[psig].rawSig
       : SIGRTMIN + (psig - PSignal_SIGRTMIN);
@@ -194,11 +197,13 @@ int psignal_into_raw_signal(PSignal const psig)
 
 char const *psignal_name(PSignal const psig)
 {
+   assert(psignal_validate(psig));
    return S_SIGNAL_SYMBOLS[psig].name;
 }
 
 char const *psignal_desc(PSignal const psig)
 {
+   assert(psignal_validate(psig));
    return S_SIGNAL_SYMBOLS[psig].desc;
 }
 

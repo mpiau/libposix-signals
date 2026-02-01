@@ -15,18 +15,16 @@
    can be extremely valuable.
 */
 
-typedef char ascii;
+typedef int PSignalCode;
 
 
 //================================================================================================
 // Public API Functions
 //================================================================================================
 
-
 /*
    Returns a non-null string containing the underlying reason of why the signal has been received.
-   If you are familiar with siginfo_t, sigcode is the value extracted from si_code.
+   If you are familiar with siginfo_t, PSignalCode is the value extracted from si_code.
    If no particular reason is found, a simple "Unspecified reason" will be returned.
 */
-[[nodiscard]]
-ascii const *psignal_emission_reason(PSignal, int sigcode);
+[[nodiscard]] char const *psignal_emission_reason(PSignal, PSignalCode);

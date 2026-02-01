@@ -9,14 +9,14 @@
 // Private Data
 //================================================================================================
 
-static constexpr ascii UNSPECIFIED_REASON[] = "Unspecified reason";
+static constexpr char UNSPECIFIED_REASON[] = "Unspecified reason.";
 
 
 //================================================================================================
 // Private functions
 //================================================================================================
 
-static ascii const *sigill_signal_reason(int const code)
+static char const *sigill_signal_reason(PSignalCode const code)
 {
    switch (code)
    {
@@ -28,13 +28,13 @@ static ascii const *sigill_signal_reason(int const code)
       case ILL_PRVREG:   return "Privileged register.";
       case ILL_COPROC:   return "Coprocessor error.";
       case ILL_BADSTK:   return "Internal stack error.";
-      case ILL_BADIADDR: return "Unimplemented instruction address";
+      case ILL_BADIADDR: return "Unimplemented instruction address.";
 
       default: return UNSPECIFIED_REASON;
    }
 }
 
-static ascii const *sigfpe_signal_reason(int const code)
+static char const *sigfpe_signal_reason(PSignalCode const code)
 {
    switch (code)
    {
@@ -46,14 +46,14 @@ static ascii const *sigfpe_signal_reason(int const code)
       case FPE_FLTRES:   return "Floating-point inexact result.";
       case FPE_FLTINV:   return "Floating-point invalid operation.";
       case FPE_FLTSUB:   return "Subscript out of range.";
-      case FPE_FLTUNK:   return "Undiagnosed floating-point exception";
+      case FPE_FLTUNK:   return "Undiagnosed floating-point exception.";
       case FPE_CONDTRAP: return "Trap on condition.";
 
       default: return UNSPECIFIED_REASON;
    }
 }
 
-static ascii const *sigsegv_signal_reason(int const code)
+static char const *sigsegv_signal_reason(PSignalCode const code)
 {
    switch (code)
    {
@@ -72,7 +72,7 @@ static ascii const *sigsegv_signal_reason(int const code)
    }
 }
 
-static ascii const *sigbus_signal_reason(int const code)
+static char const *sigbus_signal_reason(PSignalCode const code)
 {
    switch (code)
    {
@@ -86,7 +86,7 @@ static ascii const *sigbus_signal_reason(int const code)
    }
 }
 
-static ascii const *sigtrap_signal_reason(int const code)
+static char const *sigtrap_signal_reason(PSignalCode const code)
 {
    switch (code)
    {
@@ -100,7 +100,7 @@ static ascii const *sigtrap_signal_reason(int const code)
    }
 }
 
-static ascii const *sigchld_signal_reason(int const code)
+static char const *sigchld_signal_reason(PSignalCode const code)
 {
    switch (code)
    {
@@ -109,13 +109,13 @@ static ascii const *sigchld_signal_reason(int const code)
       case CLD_DUMPED:    return "Child terminated abnormally.";
       case CLD_TRAPPED:   return "Traced child has trapped.";
       case CLD_STOPPED:   return "Child has stopped.";
-      case CLD_CONTINUED: return "Stopped child has continued";
+      case CLD_CONTINUED: return "Stopped child has continued.";
 
       default: return UNSPECIFIED_REASON;
    }
 }
 
-static ascii const *sigpoll_signal_reason(int const code)
+static char const *sigpoll_signal_reason(PSignalCode const code)
 {
    switch (code)
    {
@@ -130,7 +130,7 @@ static ascii const *sigpoll_signal_reason(int const code)
    }
 }
 
-static ascii const *other_signals_reason(int const code)
+static char const *other_signals_reason(PSignalCode const code)
 {
    switch (code)
    {
@@ -154,9 +154,9 @@ static ascii const *other_signals_reason(int const code)
 // Public API Functions
 //================================================================================================
 
-ascii const *psignal_emission_reason(PSignal const sig, int const code)
+char const *psignal_emission_reason(PSignal const psig, PSignalCode const code)
 {
-   switch(sig)
+   switch (psig)
    {
       case PSignal_SIGILL:  return sigill_signal_reason(code);
       case PSignal_SIGFPE:  return sigfpe_signal_reason(code);

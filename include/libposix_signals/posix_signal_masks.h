@@ -2,6 +2,7 @@
 
 #include "posix_signals.h"
 
+
 //================================================================================================
 // POSIX Signal Bitmasks
 //================================================================================================
@@ -12,7 +13,7 @@
    Each PSignal is associated to a specific bit following the rule: (1ul << PSignal).
 */
 
-typedef unsigned _BitInt(PSignal_Count) PSignalBitmask;
+typedef unsigned _BitInt(PSignal_Count) PSignalMask;
 
 
 //================================================================================================
@@ -26,7 +27,7 @@ typedef unsigned _BitInt(PSignal_Count) PSignalBitmask;
 /*
    Bitmask representing all defined STANDARD POSIX Signals.
 */
-static constexpr PSignalBitmask PSIG_BITMASK_STANDARD_SIGNALS
+static constexpr PSignalMask PSignalMask_STANDARD_SIGNALS
    = (1ul << PSignal_SIGHUP)      | (1ul << PSignal_SIGINT)      | (1ul << PSignal_SIGQUIT)
    | (1ul << PSignal_SIGILL)      | (1ul << PSignal_SIGTRAP)     | (1ul << PSignal_SIGABRT)
    | (1ul << PSignal_SIGBUS)      | (1ul << PSignal_SIGFPE)      | (1ul << PSignal_SIGKILL)
@@ -42,7 +43,7 @@ static constexpr PSignalBitmask PSIG_BITMASK_STANDARD_SIGNALS
 /*
    Bitmask representing all defined REAL-TIME POSIX Signals.
 */
-static constexpr PSignalBitmask PSIG_BITMASK_REALTIME_SIGNALS
+static constexpr PSignalMask PSignalMask_REALTIME_SIGNALS
    = (1ul << PSignal_SIGRTMIN)    | (1ul << PSignal_SIGRTMIN_1)  | (1ul << PSignal_SIGRTMIN_2)
    | (1ul << PSignal_SIGRTMIN_3)  | (1ul << PSignal_SIGRTMIN_4)  | (1ul << PSignal_SIGRTMIN_5)
    | (1ul << PSignal_SIGRTMIN_6)  | (1ul << PSignal_SIGRTMIN_7)  | (1ul << PSignal_SIGRTMIN_8)
@@ -74,7 +75,7 @@ static constexpr PSignalBitmask PSIG_BITMASK_REALTIME_SIGNALS
    Bitmask representing all POSIX signals whose default disposition is to
    produce a core dump (crash file) and terminate the process execution.
 */
-static constexpr PSignalBitmask PSIG_BITMASK_DISPOSITION_CORE_DUMP
+static constexpr PSignalMask PSignalMask_DISPOSITION_CORE_DUMP
    = (1ul << PSignal_SIGQUIT)   | (1ul << PSignal_SIGILL)  | (1ul << PSignal_SIGTRAP)
    | (1ul << PSignal_SIGABRT)   | (1ul << PSignal_SIGBUS)  | (1ul << PSignal_SIGFPE)
    | (1ul << PSignal_SIGSEGV)   | (1ul << PSignal_SIGXCPU) | (1ul << PSignal_SIGXFSZ)
@@ -84,7 +85,7 @@ static constexpr PSignalBitmask PSIG_BITMASK_DISPOSITION_CORE_DUMP
    Bitmask representing all POSIX signals whose default disposition is to
    terminate the process.
 */
-static constexpr PSignalBitmask PSIG_BITMASK_DISPOSITION_TERMINATE
+static constexpr PSignalMask PSignalMask_DISPOSITION_TERMINATE
    = (1ul << PSignal_SIGHUP)    | (1ul << PSignal_SIGINT)  | (1ul << PSignal_SIGKILL)
    | (1ul << PSignal_SIGUSR1)   | (1ul << PSignal_SIGUSR2) | (1ul << PSignal_SIGPIPE)
    | (1ul << PSignal_SIGALRM)   | (1ul << PSignal_SIGTERM) | (1ul << PSignal_SIGSTKFLT)
@@ -95,14 +96,14 @@ static constexpr PSignalBitmask PSIG_BITMASK_DISPOSITION_TERMINATE
    Bitmask representing all POSIX signals whose default disposition is to be
    ignored by the process.
 */
-static constexpr PSignalBitmask PSIG_BITMASK_DISPOSITION_IGNORE
+static constexpr PSignalMask PSignalMask_DISPOSITION_IGNORE
    = (1ul << PSignal_SIGURG)    | (1ul << PSignal_SIGWINCH);
 
 /*
    Bitmask representing all POSIX signals whose default disposition is to
    pause/suspend the process.
 */
-static constexpr PSignalBitmask PSIG_BITMASK_DISPOSITION_STOP
+static constexpr PSignalMask PSignalMask_DISPOSITION_STOP
    = (1ul << PSignal_SIGSTOP)   | (1ul << PSignal_SIGTSTP) | (1ul << PSignal_SIGTTIN)
    | (1ul << PSignal_SIGTTOU);
 
@@ -110,15 +111,15 @@ static constexpr PSignalBitmask PSIG_BITMASK_DISPOSITION_STOP
    Bitmask representing all POSIX signals whose default disposition is to
    resume the execution of a paused/suspended process
 */
-static constexpr PSignalBitmask PSIG_BITMASK_DISPOSITION_CONTINUE
+static constexpr PSignalMask PSignalMask_DISPOSITION_CONTINUE
    = (1ul << PSignal_SIGCHLD) | (1ul << PSignal_SIGCONT);
 
 /*
    Bitmask representing all POSIX signals whose default disposition is not
    specified by the POSIX standard and thus not predictable.
 */
-static constexpr PSignalBitmask PSIG_BITMASK_DISPOSITION_UNSPECIFIED
-   = PSIG_BITMASK_REALTIME_SIGNALS;
+static constexpr PSignalMask PSignalMask_DISPOSITION_UNSPECIFIED
+   = PSignalMask_REALTIME_SIGNALS;
 
 
 //------------------------------------------------------------------------------------------------
@@ -128,37 +129,38 @@ static constexpr PSignalBitmask PSIG_BITMASK_DISPOSITION_UNSPECIFIED
 /*
    Bitmask representing no signal and that can be used as a default/reset value.
 */
-static constexpr PSignalBitmask PSIG_BITMASK_NONE = 0ul;
+static constexpr PSignalMask PSignalMask_NONE
+   = 0ul;
 
 /*
    Bitmask representing all defined POSIX Signals.
 */
-static constexpr PSignalBitmask PSIG_BITMASK_ALL
-   = PSIG_BITMASK_STANDARD_SIGNALS
-   | PSIG_BITMASK_REALTIME_SIGNALS;
+static constexpr PSignalMask PSignalMask_ALL
+   = PSignalMask_STANDARD_SIGNALS
+   | PSignalMask_REALTIME_SIGNALS;
 
 /*
    Bitmask representing all POSIX signals considered as fatal by the process
    when received and will end its execution.
 */
-static constexpr PSignalBitmask PSIG_BITMASK_FATAL_SIGNALS
-   = PSIG_BITMASK_DISPOSITION_CORE_DUMP
-   | PSIG_BITMASK_DISPOSITION_TERMINATE;
+static constexpr PSignalMask PSignalMask_FATAL_SIGNALS
+   = PSignalMask_DISPOSITION_CORE_DUMP
+   | PSignalMask_DISPOSITION_TERMINATE;
 
 /*
    Bitmask representing all POSIX signals that can't be hooked according to the
    POSIX standard.
 */
-static constexpr PSignalBitmask PSIG_BITMASK_UNHOOKABLE_SIGNALS
+static constexpr PSignalMask PSignalMask_UNHOOKABLE_SIGNALS
    = (1ul << PSignal_SIGKILL) | (1ul << PSignal_SIGSTOP);
 
 /*
    Bitmask representing all POSIX signals that can be hooked on according to the
    POSIX standard.
 */
-static constexpr PSignalBitmask PSIG_BITMASK_HOOKABLE_SIGNALS
-   = PSIG_BITMASK_ALL
-   ^ PSIG_BITMASK_UNHOOKABLE_SIGNALS;
+static constexpr PSignalMask PSignalMask_HOOKABLE_SIGNALS
+   = PSignalMask_ALL
+   ^ PSignalMask_UNHOOKABLE_SIGNALS;
 
 
 //================================================================================================
@@ -166,38 +168,38 @@ static constexpr PSignalBitmask PSIG_BITMASK_HOOKABLE_SIGNALS
 //================================================================================================
 
 static_assert(
-   sizeof(PSignalBitmask) <= 64u, "Binary mask must not exceed 64 bits in size."
+   sizeof(PSignalMask) <= 64u, "Binary mask must not exceed 64 bits in size."
 );
 
 static_assert(
-   (PSIG_BITMASK_ALL
-      ^ PSIG_BITMASK_STANDARD_SIGNALS
-      ^ PSIG_BITMASK_REALTIME_SIGNALS
-   ) == PSIG_BITMASK_NONE, "All signals must be defined as STANDARD or REAL-TIME."
+   (PSignalMask_ALL
+      ^ PSignalMask_STANDARD_SIGNALS
+      ^ PSignalMask_REALTIME_SIGNALS
+   ) == PSignalMask_NONE, "All signals must be defined as either STANDARD or REAL-TIME."
 );
 
 static_assert(
-   (PSIG_BITMASK_ALL
-      ^ PSIG_BITMASK_DISPOSITION_CORE_DUMP
-      ^ PSIG_BITMASK_DISPOSITION_STOP
-      ^ PSIG_BITMASK_DISPOSITION_TERMINATE
-      ^ PSIG_BITMASK_DISPOSITION_CONTINUE
-      ^ PSIG_BITMASK_DISPOSITION_IGNORE
-      ^ PSIG_BITMASK_DISPOSITION_UNSPECIFIED
-   ) == PSIG_BITMASK_NONE, "All signals must define exactly one default disposition."
+   (PSignalMask_ALL
+      ^ PSignalMask_DISPOSITION_CORE_DUMP
+      ^ PSignalMask_DISPOSITION_STOP
+      ^ PSignalMask_DISPOSITION_TERMINATE
+      ^ PSignalMask_DISPOSITION_CONTINUE
+      ^ PSignalMask_DISPOSITION_IGNORE
+      ^ PSignalMask_DISPOSITION_UNSPECIFIED
+   ) == PSignalMask_NONE, "All signals must define exactly one default disposition."
 );
 
 static_assert(
-   __builtin_popcountll(PSIG_BITMASK_STANDARD_SIGNALS) == PSignal_StandardCount,
-   "The bitmask doesn't represent all standard defined signals."
+   __builtin_popcountll(PSignalMask_STANDARD_SIGNALS) == PSignal_StandardCount,
+   "That bitmask must represent all standard defined signals."
 );
 
 static_assert(
-   __builtin_popcountll(PSIG_BITMASK_REALTIME_SIGNALS) == PSignal_RealtimeCount,
-   "The bitmask doesn't represent all real-time defined signals."
+   __builtin_popcountll(PSignalMask_REALTIME_SIGNALS) == PSignal_RealtimeCount,
+   "That bitmask must represent all real-time defined signals."
 );
 
 static_assert(
-   __builtin_popcountll(PSIG_BITMASK_ALL) == PSignal_Count,
-   "The bitmask doesn't represent all defined signals."
+   __builtin_popcountll(PSignalMask_ALL) == PSignal_Count,
+   "That bitmask must represent all defined signals."
 );
