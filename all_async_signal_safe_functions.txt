@@ -1,0 +1,216 @@
+An async-signal-safe function is one that can be safely called from within a signal handler.
+Many functions are NOT async-signal-safe.
+
+Based on https://man7.org/linux/man-pages/man7/signal-safety.7.html,
+See the exhaustive list of all functions considered as async-signal-safe :
+
+[A]
+   abort
+   accept
+   access
+   aio_error
+   aio_return
+   aio_suspend
+   alarm
+[B]
+   bind
+[C]
+   cfgetispeed
+   cfgetospeed
+   cfsetispeed
+   cfsetospeed
+   chdir
+   chmod
+   chown
+   clock_gettime
+   close
+   connect
+   creat
+[D]
+   dup
+   dup2
+[E]
+   execl
+   execle
+   execv
+   execve
+   _exit
+   _Exit
+[F]
+   faccessat
+   fchdir
+   fchmod
+   fchmodat
+   fchown
+   fchownat
+   fcntl
+   fdatasync
+   fexecve
+   ffs
+   _Fork
+   fstat
+   fstatat
+   fsync
+   ftruncate
+   futimens
+[G]
+   getegid
+   geteuid
+   getgid
+   getgroups
+   getpeername
+   getpgrp
+   getpid
+   getppid
+   getsockname
+   getsockopt
+   getuid
+[H]
+   htonl
+   htons
+[K]
+   kill
+[L]
+   link
+   linkat
+   listen
+   longjmp
+   lseek
+   lstat
+[M]
+   memccpy
+   memchr
+   memcmp
+   memcpy
+   memmove
+   memset
+   mkdir
+   mkdirat
+   mkfifo
+   mkfifoat
+   mknod
+   mknodat
+[N]
+   ntohl
+   ntohs
+[O]
+   open
+   openat
+[P]
+   pause
+   pipe
+   poll
+   posix_trace_event
+   pselect
+   pthread_kill
+   pthread_self
+   pthread_sigmask
+[R]
+   raise
+   read
+   readlink
+   readlinkat
+   recv
+   recvfrom
+   recvmsg
+   rename
+   renameat
+   rmdir
+[S]
+   select
+   sem_post
+   send
+   sendmsg
+   sendto
+   setgid
+   setpgid
+   setsid
+   setsockopt
+   setuid
+   shutdown
+   sigaction
+   sigaddset
+   sigdelset
+   sigemptyset
+   sigfillset
+   sigismember
+   siglongjmp
+   signal
+   sigpause
+   sigpending
+   sigprocmask
+   sigqueue
+   sigset
+   sigsuspend
+   sleep
+   sockatmark
+   socket
+   socketpair
+   stat
+   stpcpy
+   stpncpy
+   strcat
+   strchr
+   strcmp
+   strcpy
+   strcspn
+   strlen
+   strncat
+   strncmp
+   strncpy
+   strnlen
+   strpbrk
+   strrchr
+   strspn
+   strstr
+   strtok_r
+   symlink
+   symlinkat
+[T]
+   tcdrain
+   tcflow
+   tcflush
+   tcgetattr
+   tcgetpgrp
+   tcsendbreak
+   tcsetattr
+   tcsetpgrp
+   time
+   timer_getoverrun
+   timer_gettime
+   timer_settime
+   times
+[U]
+   umask
+   uname
+   unlink
+   unlinkat
+   utime
+   utimensat
+   utimes
+[W]
+   wait
+   waitpid
+   wcpcpy
+   wcpncpy
+   wcscat
+   wcschr
+   wcscmp
+   wcscpy
+   wcscspn
+   wcslen
+   wcsncat
+   wcsncmp
+   wcsncpy
+   wcsnlen
+   wcspbrk
+   wcsrchr
+   wcsspn
+   wcsstr
+   wcstok
+   wmemchr
+   wmemcmp
+   wmemcpy
+   wmemmove
+   wmemset
+   write
