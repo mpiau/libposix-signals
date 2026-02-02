@@ -56,6 +56,10 @@ int main(void)
       printf("POSIX Signal %2i -> %-15s (%-45s) - %s\n", rawSignal, name, desc, type);
    }
 
+   assert(!psignal_callback_register(nullptr));
+   assert(!psignal_callback_attach_mask(nullptr, PSignalMask_FATAL_SIGNALS));
+
+
    assert(psignal_callback_register(crash_callback));
    assert(psignal_callback_attach_mask(crash_callback, PSignalMask_FATAL_SIGNALS));
 

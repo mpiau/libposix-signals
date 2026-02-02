@@ -50,7 +50,10 @@ static PSignalMask sum_slots_mask(void)
 [[nodiscard]]
 static PSignalSlot *slot_try_get(PSignalCallback const cb)
 {
-   if (!cb) return nullptr;
+   if (cb == nullptr)
+   {
+      return nullptr;
+   }
 
    for (unsigned idx = 0; idx < s_nbSlotsUsed; ++idx)
    {
@@ -149,8 +152,6 @@ static void refresh_signal_hooks(void)
          unhook_posix_signal(psig);
       }
    }
-
-   return;
 }
 
 
@@ -218,7 +219,7 @@ bool psignal_callback_has_available_slot(void)
 bool psignal_callback_register(PSignalCallback const cb)
 {
    PSignalSlot *slot = slot_try_get(cb);
-   if (slot == nullptr && psignal_callback_has_available_slot())
+   if (slot == nullptr && cb != nullptr && psignal_callback_has_available_slot())
    {
       slot = &s_slots[s_nbSlotsUsed];
       slot->callback = cb;
