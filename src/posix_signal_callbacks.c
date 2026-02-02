@@ -65,6 +65,19 @@ static PSignalSlot *slot_try_get(PSignalCallback const cb)
    return nullptr;
 }
 
+static PSignalSlot *slot_try_get_or_register(PSignalCallback const cb)
+{
+   PSignalSlot *slot = slot_try_get(cb);
+   if (slot == nullptr && cb != nullptr && psignal_callback_has_available_slot())
+   {
+      slot = &s_slots[s_nbSlotsUsed];
+      slot->callback = cb;
+      slot->mask = PSignalMask_NONE;
+      s_nbSlotsUsed += 1;
+   }
+   return slot;
+}
+
 static void sigaction_callback_entry_point(int const sig, siginfo_t *const info, void *const context)
 {
    PSignal psig;
@@ -74,7 +87,7 @@ static void sigaction_callback_entry_point(int const sig, siginfo_t *const info,
       exit(sig);
    }
 
-   PSigHookData const data = (PSigHookData) {
+   PSignalHookData const data = (PSignalHookData) {
       .psig = psig,
       .code = (info ? info->si_signo : 0),
       .info = (void const *)info,
@@ -216,20 +229,6 @@ bool psignal_callback_has_available_slot(void)
    return s_nbSlotsUsed < array_capacity(s_slots);
 }
 
-bool psignal_callback_register(PSignalCallback const cb)
-{
-   PSignalSlot *slot = slot_try_get(cb);
-   if (slot == nullptr && cb != nullptr && psignal_callback_has_available_slot())
-   {
-      slot = &s_slots[s_nbSlotsUsed];
-      slot->callback = cb;
-      slot->mask = PSignalMask_NONE;
-      s_nbSlotsUsed += 1;
-      refresh_signal_hooks();
-   }
-   return slot;
-}
-
 bool psignal_callback_is_registered(PSignalCallback const cb)
 {
    return slot_try_get(cb) != nullptr;
@@ -238,7 +237,7 @@ bool psignal_callback_is_registered(PSignalCallback const cb)
 void psignal_callback_unregister(PSignalCallback const cb)
 {
    PSignalSlot *const slot = slot_try_get(cb);
-   if (slot != nullptr)
+   if (slot)
    {
       *slot = s_slots[s_nbSlotsUsed - 1];
       s_nbSlotsUsed -= 1;
@@ -264,7 +263,7 @@ bool psignal_callback_attach_signal(PSignalCallback const cb, PSignal const psig
 
 bool psignal_callback_attach_mask(PSignalCallback const cb, PSignalMask const mask)
 {
-   PSignalSlot *const slot = slot_try_get(cb);
+   PSignalSlot *const slot = slot_try_get_or_register(cb);
    if (slot != nullptr)
    {
       slot->mask |= mask;

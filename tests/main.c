@@ -8,7 +8,7 @@ static sig_atomic_t sigintReceived = 0;
 static sig_atomic_t sigsegvReceived = 0;
 static sig_atomic_t sigcontReceived = 0;
 
-void crash_callback(PSigHookData const *data)
+void crash_callback(PSignalHookData const *data)
 {
    printf("Crash callback called with signal %s (%i)\n",
       psignal_name(data->psig), psignal_into_raw_signal(data->psig)
@@ -23,7 +23,7 @@ void crash_callback(PSigHookData const *data)
    }
 }
 
-void crash_callback_two(PSigHookData const *data)
+void crash_callback_two(PSignalHookData const *data)
 {
    printf("Crash callback 2 called with signal %s (%i)\n",
       psignal_name(data->psig), psignal_into_raw_signal(data->psig)
@@ -56,11 +56,7 @@ int main(void)
       printf("POSIX Signal %2i -> %-15s (%-45s) - %s\n", rawSignal, name, desc, type);
    }
 
-   assert(!psignal_callback_register(nullptr));
    assert(!psignal_callback_attach_mask(nullptr, PSignalMask_FATAL_SIGNALS));
-
-
-   assert(psignal_callback_register(crash_callback));
    assert(psignal_callback_attach_mask(crash_callback, PSignalMask_FATAL_SIGNALS));
 
    psignal_callback_detach_signal(crash_callback, PSignal_SIGINT);
@@ -82,7 +78,6 @@ int main(void)
    assert(sigcontReceived == 0);
 
    printf("Registering another callback without SIGSEGV...\n");
-   assert(psignal_callback_register(crash_callback_two));
    assert(psignal_callback_attach_mask(crash_callback_two, PSignalMask_FATAL_SIGNALS));
    psignal_callback_detach_signal(crash_callback_two, PSignal_SIGSEGV);
 
@@ -100,7 +95,7 @@ int main(void)
    assert(psignal_callback_is_registered(crash_callback));
    psignal_callback_unregister(crash_callback);
    assert(!psignal_callback_is_registered(crash_callback));
-   psignal_callback_register(crash_callback);
+   psignal_callback_attach_mask(crash_callback, PSignalMask_NONE);
    assert(!psignal_callback_is_mask_attached(crash_callback, PSignalMask_FATAL_SIGNALS));
    assert(psignal_callback_is_mask_attached(crash_callback, PSignalMask_NONE));
 

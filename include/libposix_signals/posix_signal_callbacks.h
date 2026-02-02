@@ -13,16 +13,16 @@
    extracting their content.
 */
 
-struct PSigHookData
+struct PSignalHookData
 {
    PSignal     psig;
    PSignalCode code;
    void const *info; // siginfo_t
    void const *context; // ucontext_t
 };
-typedef struct PSigHookData PSigHookData;
+typedef struct PSignalHookData PSignalHookData;
 
-typedef void (*PSignalCallback)(PSigHookData const *);
+typedef void (*PSignalCallback)(PSignalHookData const *);
 
 /*
    Controls the number of callbacks that can be supported at the same time.
@@ -69,19 +69,12 @@ bool psignal_restore_default_stack(void);
 [[nodiscard]] bool psignal_callback_has_available_slot(void);
 
 /*
-   Registers a callback to the system.
-   It's not possible to register the same callback multiple times but will still
-   returns true as the callback will be registered in the system.
-*/
-bool psignal_callback_register(PSignalCallback);
-
-/*
    Checks if a particular callback is registered in the system.
 */
 [[nodiscard]] bool psignal_callback_is_registered(PSignalCallback);
 
 /*
-   Unregisters the given callback from the system.
+   Unregisters given callback.
 */
 void psignal_callback_unregister(PSignalCallback);
 
@@ -97,24 +90,28 @@ void psignal_callback_unregister_all(void);
 
 /*
    Hooks the callback to a particular signal.
+   Register the callback if not registered yet in the system.
    The other existing hooks associated with the callback are left unchanged.
 */
 bool psignal_callback_attach_signal(PSignalCallback, PSignal);
 
 /*
    Hooks the callback the set of signals specified in the mask.
+   Register the callback if not registered yet in the system.
    The other existing hooks associated with the callback are left unchanged.
 */
 bool psignal_callback_attach_mask(PSignalCallback, PSignalMask);
 
 /*
    Unhooks the callback from a particular signal.
+   Unregister the callback if not attached to any signal.
    The other existing hooks associated with the callback are left unchanged.
 */
 void psignal_callback_detach_signal(PSignalCallback, PSignal);
 
 /*
    Unhooks the callback from a particular set of signals specified in the mask.
+   Unregister the callback if not attached to any signal.
    The other existing hooks associated with the callback are left unchanged.
 */
 void psignal_callback_detach_mask(PSignalCallback, PSignalMask);
