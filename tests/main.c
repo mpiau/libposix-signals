@@ -59,13 +59,13 @@ int main(void)
    assert(!psignal_callback_attach_mask(nullptr, PSignalMask_FATAL_SIGNALS));
    assert(psignal_callback_attach_mask(crash_callback, PSignalMask_FATAL_SIGNALS));
 
-   psignal_callback_detach_signal(crash_callback, PSignal_SIGINT);
-   assert(!psignal_callback_is_signal_attached(crash_callback, PSignal_SIGINT));
-   assert(psignal_callback_is_signal_attached(crash_callback, PSignal_SIGHUP));
-   assert(!psignal_callback_is_mask_attached(crash_callback, PSignalMask_FATAL_SIGNALS));
+   psignal_callback_detach(crash_callback, PSignal_SIGINT);
+   assert(!psignal_callback_is_attached(crash_callback, PSignal_SIGINT));
+   assert(psignal_callback_is_attached(crash_callback, PSignal_SIGHUP));
+   assert(!psignal_callback_is_attached_mask(crash_callback, PSignalMask_FATAL_SIGNALS));
 
-   assert(psignal_callback_attach_signal(crash_callback, PSignal_SIGINT));
-   assert(psignal_callback_is_mask_attached(crash_callback, PSignalMask_FATAL_SIGNALS));
+   assert(psignal_callback_attach(crash_callback, PSignal_SIGINT));
+   assert(psignal_callback_is_attached_mask(crash_callback, PSignalMask_FATAL_SIGNALS));
 
    printf("Raising hooked SIGINT...\n");
    assert(psignal_raise(PSignal_SIGINT));
@@ -79,7 +79,7 @@ int main(void)
 
    printf("Registering another callback without SIGSEGV...\n");
    assert(psignal_callback_attach_mask(crash_callback_two, PSignalMask_FATAL_SIGNALS));
-   psignal_callback_detach_signal(crash_callback_two, PSignal_SIGSEGV);
+   psignal_callback_detach(crash_callback_two, PSignal_SIGSEGV);
 
    printf("Raising double-hooked SIGINT...\n");
    assert(psignal_raise(PSignal_SIGINT));
@@ -96,8 +96,8 @@ int main(void)
    psignal_callback_unregister(crash_callback);
    assert(!psignal_callback_is_registered(crash_callback));
    psignal_callback_attach_mask(crash_callback, PSignalMask_NONE);
-   assert(!psignal_callback_is_mask_attached(crash_callback, PSignalMask_FATAL_SIGNALS));
-   assert(psignal_callback_is_mask_attached(crash_callback, PSignalMask_NONE));
+   assert(!psignal_callback_is_attached_mask(crash_callback, PSignalMask_FATAL_SIGNALS));
+   assert(psignal_callback_is_attached_mask(crash_callback, PSignalMask_NONE));
 
    psignal_callback_unregister_all();
    assert(!psignal_callback_is_registered(crash_callback));

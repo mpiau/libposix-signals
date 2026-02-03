@@ -256,7 +256,7 @@ void psignal_callback_unregister_all(void)
 // Callback Hook addition/substraction functions.
 //------------------------------------------------------------------------------------------------
 
-bool psignal_callback_attach_signal(PSignalCallback const cb, PSignal const psig)
+bool psignal_callback_attach(PSignalCallback const cb, PSignal const psig)
 {
    return psignal_callback_attach_mask(cb, (1ul << psig));
 }
@@ -273,7 +273,7 @@ bool psignal_callback_attach_mask(PSignalCallback const cb, PSignalMask const ma
    return false;
 }
 
-void psignal_callback_detach_signal(PSignalCallback const cb, PSignal const psig)
+void psignal_callback_detach(PSignalCallback const cb, PSignal const psig)
 {
    psignal_callback_detach_mask(cb, (1ul << psig));
 }
@@ -288,12 +288,12 @@ void psignal_callback_detach_mask(PSignalCallback const cb, PSignalMask const ma
    }
 }
 
-bool psignal_callback_is_signal_attached(PSignalCallback const cb, PSignal const psig)
+bool psignal_callback_is_attached(PSignalCallback const cb, PSignal const psig)
 {
-   return psignal_callback_is_mask_attached(cb, (1ul << psig));
+   return psignal_callback_is_attached_mask(cb, (1ul << psig));
 }
 
-bool psignal_callback_is_mask_attached(PSignalCallback const cb, PSignalMask const mask)
+bool psignal_callback_is_attached_mask(PSignalCallback const cb, PSignalMask const mask)
 {
    PSignalSlot *const slot = slot_try_get(cb);
    return slot && ((slot->mask & mask) == mask);

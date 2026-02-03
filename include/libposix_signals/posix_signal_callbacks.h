@@ -93,7 +93,7 @@ void psignal_callback_unregister_all(void);
    Register the callback if not registered yet in the system.
    The other existing hooks associated with the callback are left unchanged.
 */
-bool psignal_callback_attach_signal(PSignalCallback, PSignal);
+bool psignal_callback_attach(PSignalCallback, PSignal);
 
 /*
    Hooks the callback the set of signals specified in the mask.
@@ -107,7 +107,7 @@ bool psignal_callback_attach_mask(PSignalCallback, PSignalMask);
    Unregister the callback if not attached to any signal.
    The other existing hooks associated with the callback are left unchanged.
 */
-void psignal_callback_detach_signal(PSignalCallback, PSignal);
+void psignal_callback_detach(PSignalCallback, PSignal);
 
 /*
    Unhooks the callback from a particular set of signals specified in the mask.
@@ -119,10 +119,10 @@ void psignal_callback_detach_mask(PSignalCallback, PSignalMask);
 /*
    Returns true if the callback currently has a hook on the given signal.
 */
-[[nodiscard]] bool psignal_callback_is_signal_attached(PSignalCallback, PSignal);
+[[nodiscard]] bool psignal_callback_is_attached(PSignalCallback, PSignal);
 
 /*
    Returns true only if the callback has a hook on the whole set of signals specified
    in the mask.
 */
-[[nodiscard]] bool psignal_callback_is_mask_attached(PSignalCallback, PSignalMask);
+[[nodiscard]] bool psignal_callback_is_attached_mask(PSignalCallback, PSignalMask);
