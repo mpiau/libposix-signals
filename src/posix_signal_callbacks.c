@@ -167,6 +167,15 @@ static void refresh_signal_hooks(void)
    }
 }
 
+static void free_alternate_stack_memory(void)
+{
+   if (s_alternateStack.ss_sp != nullptr)
+   {
+      free(s_alternateStack.ss_sp);
+      s_alternateStack.ss_sp = nullptr;
+      s_alternateStack.ss_size = 0;
+   }
+}
 
 // ===============================================================================================
 // Public API Functions
@@ -194,8 +203,7 @@ bool psignal_setup_alternate_stack(void)
 
    if (sigaltstack(&s_alternateStack, &s_defaultStack) != 0)
    {
-      free(s_alternateStack.ss_sp);
-      s_alternateStack.ss_size = 0;
+      free_alternate_stack_memory();
       return false;
    }
 
@@ -213,9 +221,7 @@ bool psignal_restore_default_stack(void)
       return false;
    }
 
-   free(s_alternateStack.ss_sp);
-   s_alternateStack.ss_sp = nullptr;
-   s_alternateStack.ss_size = 0;
+   free_alternate_stack_memory();
    return true;
 }
 
