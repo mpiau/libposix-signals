@@ -234,6 +234,11 @@ bool psignal_callback_is_registered(PSignalCallback const cb)
    return slot_try_get(cb) != nullptr;
 }
 
+bool psignal_callback_register(PSignalCallback const cb)
+{
+   return slot_try_get_or_register(cb) != nullptr;
+}
+
 void psignal_callback_unregister(PSignalCallback const cb)
 {
    PSignalSlot *const slot = slot_try_get(cb);

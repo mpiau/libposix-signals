@@ -37,8 +37,11 @@ static constexpr unsigned PSIG_CALLBACK_MAX_SLOTS_CAPACITY = 16u;
 // ===============================================================================================
 
 /*
-   IMPORTANT: These functions are not thread-safe.
-   Even if explicitly specified, it's not possible to hook SIGKILL and SIGSTOP.
+   IMPORTANT:
+   - These functions are not thread-safe.
+   - A callback can stay registered even without being attached to any signal.
+   - You can't register a nullptr callback.
+   - Even if explicitly specified, it's not possible to hook SIGKILL and SIGSTOP.
    However, the API is aware of that and will simply ignore them. Treating these as errors when
    specified in a mask would be too cumbersome for the user.
 */
@@ -74,6 +77,11 @@ bool psignal_restore_default_stack(void);
 [[nodiscard]] bool psignal_callback_is_registered(PSignalCallback);
 
 /*
+   Registers given callback.
+*/
+bool psignal_callback_register(PSignalCallback);
+
+/*
    Unregisters given callback.
 */
 void psignal_callback_unregister(PSignalCallback);
@@ -104,14 +112,12 @@ bool psignal_callback_attach_mask(PSignalCallback, PSignalMask);
 
 /*
    Unhooks the callback from a particular signal.
-   Unregister the callback if not attached to any signal.
    The other existing hooks associated with the callback are left unchanged.
 */
 void psignal_callback_detach(PSignalCallback, PSignal);
 
 /*
    Unhooks the callback from a particular set of signals specified in the mask.
-   Unregister the callback if not attached to any signal.
    The other existing hooks associated with the callback are left unchanged.
 */
 void psignal_callback_detach_mask(PSignalCallback, PSignalMask);
